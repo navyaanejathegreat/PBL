@@ -1,0 +1,4 @@
+split,images,label_files,missing_labels,orphan_labels,duplicate_label_stems,empty_labels,instances,classes_present,malformed_rows,mixed_format_files
+train,27440,27442,0,2,0,2,40244,74,0,32
+valid,3923,3923,0,0,0,1,5896,69,0,7
+test,1960,1960,0,0,0,1,2898,67,0,5
