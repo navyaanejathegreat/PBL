@@ -35,36 +35,45 @@ RUNS = [
      "Exact duplicates removed (ewaste_final)"),
     ("Final", Path(r"D:\ewaste_runs\final_v2"),
      "Grouped re-split, 66 classes (ewaste_v2)"),
+    ("+ Bangladesh", Path(r"D:\ewaste_runs\final_v4_ft"),
+     "Fine-tuned with an independent dataset's photos (ewaste_v4)"),
 ]
 STATUS_FILE = HERE / "project_status.json"
-MODEL_CANDIDATES = [
-    Path(r"D:\ewaste_runs\final_v2\weights\best.pt"),
-    PROJECT / "runs/detect/yolo26n_deduplicated-4/weights/best.pt",
-]
 STALL_MINUTES = 30
+MODELS_FILE = HERE / "models.json"
 
-_model = None
-_model_path = None
+_models = {}          # key -> loaded YOLO model (loaded on first use, then kept)
+_model_path = None    # model given with --model (shown as "Custom" in the list)
 _device = "cpu"
 
 
-def pick_model(explicit):
-    if explicit:
-        return Path(explicit)
-    for p in MODEL_CANDIDATES:
-        if p.exists():
-            return p
-    return None
+def model_list():
+    """Every model in models.json whose weights exist, in order, plus --model if given."""
+    entries = []
+    if MODELS_FILE.exists():
+        entries = json.loads(MODELS_FILE.read_text(encoding="utf-8")).get("models", [])
+    out = []
+    for m in entries:
+        path = Path(m["path"].replace("{PROJECT}", str(PROJECT)))
+        out.append({**m, "path": str(path), "available": path.exists()})
+    if _model_path:
+        out.append({"key": "custom", "name": f"Custom: {_model_path.parent.parent.name}", "path": str(_model_path),
+                    "available": _model_path.exists(), "default": True, "note": "Given with --model"})
+    avail = [m for m in out if m["available"]]
+    default = next((m["key"] for m in reversed(avail) if m.get("default")), avail[-1]["key"] if avail else None)
+    return out, default
 
 
-def get_model():
-    global _model
-    if _model is None:
+def get_model(key=None):
+    models, default = model_list()
+    key = key or default
+    m = next((m for m in models if m["key"] == key), None)
+    if m is None or not m["available"]:
+        raise FileNotFoundError(f"Model '{key}' has no weights file. Check its path in webapp/models.json.")
+    if key not in _models:
         from ultralytics import YOLO
-        if _model_path is None or not _model_path.exists():
-            raise FileNotFoundError("No trained model found. Start with --model path\\to\\best.pt")
-        _model = YOLO(str(_model_path))
-    return _model
+        _models[key] = YOLO(m["path"])
+    return _models[key], m
 
 
 def read_epochs_from_args(run_dir):
@@ -119,11 +128,13 @@ def status_payload():
     project = {}
     if STATUS_FILE.exists():
         project = json.loads(STATUS_FILE.read_text(encoding="utf-8"))
+    models, default = model_list()
     return {
         "now": time.time(),
         "runs": [run_status(*r) for r in RUNS],
         "project": project,
-        "model": str(_model_path) if _model_path else None,
+        "models": models,
+        "default_model": default,
         "device": _device,
     }
 
@@ -134,7 +145,7 @@ def predict(payload):
     from PIL import Image
     img = Image.open(io.BytesIO(raw)).convert("RGB")
     conf = float(payload.get("conf", 0.25))
-    model = get_model()
+    model, info = get_model(payload.get("model"))
     t0 = time.perf_counter()
     res = model.predict(img, conf=conf, device=_device, verbose=False)[0]
     ms = (time.perf_counter() - t0) * 1000
@@ -146,7 +157,7 @@ def predict(payload):
                      "box": [round(x1, 1), round(y1, 1), round(x2, 1), round(y2, 1)]})
     dets.sort(key=lambda d: -d["conf"])
     return {"width": img.width, "height": img.height, "ms": round(ms, 1),
-            "detections": dets, "model": _model_path.name if _model_path else None}
+            "detections": dets, "model": info["key"], "model_name": info["name"]}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -199,13 +210,15 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     global _model_path, _device
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default=None, help="path to best.pt (default: newest known run)")
+    ap.add_argument("--model", default=None, help="extra best.pt to list as Custom (models.json lists the rest)")
     ap.add_argument("--device", default="cpu", help="cpu (default) or 0 for the GPU")
     ap.add_argument("--port", type=int, default=8000)
     a = ap.parse_args()
-    _model_path = pick_model(a.model)
+    _model_path = Path(a.model) if a.model else None
     _device = a.device
-    print(f"Model:  {_model_path or 'none found yet (Inspect tab will say so)'}")
+    models, default = model_list()
+    print("Models: " + ", ".join(m["name"] + ("" if m["available"] else " (no weights yet)") for m in models))
+    print(f"Default: {default}")
     print(f"Device: {_device}")
     print(f"Open    http://localhost:{a.port}   (Ctrl+C to stop)")
     ThreadingHTTPServer(("127.0.0.1", a.port), Handler).serve_forever()

@@ -120,6 +120,38 @@
   .items li .sw { align-self: center; }
   .items li small { grid-column: 2 / 4; color: var(--mute); }
 
+  /* model picker */
+  .modelbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 4px 4px 14px; }
+  .modelbar label { font-weight: 700; font-size: 14px; color: var(--mute); }
+  .modelbar select { padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--blue); background: var(--blue-soft); color: var(--blue-2); font-weight: 700; min-width: 320px; }
+  .mscore { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+  .mscore span { padding: 6px 11px; border-radius: 999px; background: var(--bg); font-size: 13px; font-weight: 700; }
+  .mscore b { color: var(--blue); }
+  .modelbar .btn { margin-left: auto; }
+  .mnote { flex-basis: 100%; color: var(--mute); font-size: 13.5px; margin: -4px 0 0; }
+  .compare { margin-top: 16px; }
+  .compare table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .compare th { text-align: left; color: var(--mute); font-weight: 700; font-size: 12.5px; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  .compare td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .compare tr.cur td { background: var(--blue-soft); }
+  .compare td.num { font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+  .compare small { color: var(--mute); }
+
+  /* model history */
+  .history { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  .hcard { background: var(--card); border: 1.5px solid var(--line); border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+  .hcard:hover { border-color: var(--blue); }
+  .hcard.sel { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(51,85,255,.15); }
+  .hcard.off { opacity: .55; cursor: default; }
+  .hcard .step { font-size: 12.5px; font-weight: 700; color: var(--mute); }
+  .hcard .hname { font-weight: 700; line-height: 1.3; min-height: 2.6em; }
+  .hcard .hmap { font-family: var(--display); font-size: 40px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--blue); font-variant-numeric: tabular-nums; }
+  .hcard .hmap small { font-family: var(--font); font-size: 13px; color: var(--mute); font-weight: 600; letter-spacing: 0; margin-left: 4px; }
+  .hcard .hbar { height: 8px; border-radius: 4px; background: var(--card-2); overflow: hidden; }
+  .hcard .hbar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--blue), var(--violet)); }
+  .hcard .hbadge { align-self: flex-start; font-size: 12px; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: var(--green); color: #fff; }
+  .hcard .hnote { font-size: 13px; color: var(--mute); }
+
   /* sections */
   section.block { padding: 96px 0 0; }
   .head { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 28px; flex-wrap: wrap; }
@@ -204,7 +236,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.6 9"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.2-2.1"/><path d="M14 16l-3 3 3 3"/><path d="M8.3 13.3L7.6 9 3.3 9.7"/><path d="M9.3 5.3l1.2-2.1a1.8 1.8 0 0 1 3.1 0l4 7"/><path d="M13.7 9.5l3.9 0.6.6-4.3"/></svg></span>
       E-Waste Inspector</a>
     <nav class="links" aria-label="Sections">
-      <a href="#inspect">Inspect</a><a href="#training">Training</a><a href="#dataset">Dataset</a><a href="#progress">Progress</a>
+      <a href="#inspect">Inspect</a><a href="#history">Models</a><a href="#training">Training</a><a href="#dataset">Dataset</a><a href="#progress">Progress</a>
     </nav>
     <span class="server"><span class="dot" id="srv-dot"></span><span id="srv-text">Connecting…</span></span>
     <a class="btn primary small" href="#inspect">Inspect a load</a>
@@ -235,6 +267,13 @@
 
     <div class="showcase" id="inspect">
       <div>
+        <div class="modelbar">
+          <label for="model">Model</label>
+          <select id="model"></select>
+          <span class="mscore" id="mscore"></span>
+          <button class="btn small" id="compareBtn" disabled>Compare all models on this photo</button>
+          <p class="mnote" id="mnote"></p>
+        </div>
         <div class="stage" id="stage">
           <div class="empty" id="empty">
             <div class="icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="11" r="2"/><path d="M21 16l-5-5-8 8"/></svg></div>
@@ -261,6 +300,7 @@
           <span class="timing" id="timing"></span>
         </div>
         <p class="err" id="error" role="alert"></p>
+        <div class="compare panel" id="compare" hidden><h3 class="row">Every model on this photo <span class="right" id="compareState"></span></h3><table><thead><tr><th>Model</th><th>Items</th><th>Purity</th><th>Time</th><th>What it found</th></tr></thead><tbody id="compareBody"></tbody></table></div>
       </div>
       <aside class="panel ledger" aria-labelledby="h-ledger">
         <h3 id="h-ledger">Load quality</h3>
@@ -272,6 +312,14 @@
         <ul class="items" id="dets" hidden></ul>
       </aside>
     </div>
+
+    <section class="block" id="history">
+      <div class="head">
+        <div><span class="pill">Click a model to use it</span><h2>How the model improved</h2></div>
+        <p>Every model trained in this project, in order, with its score on held-out test images. Older models stay available so they can be compared.</p>
+      </div>
+      <div class="history" id="historyCards"></div>
+    </section>
 
     <section class="block" id="training">
       <div class="head">
@@ -430,13 +478,51 @@ function renderProject(p) {
     `<li class="${c.status === "done" ? "done" : c.status === "in progress" ? "prog" : ""}">${c.item}${c.note ? `<small>${c.note}</small>` : ""}</li>`).join("");
 }
 
+let MODELS = [], currentModel = null;
+const fmt3 = v => (v == null ? "pending" : v.toFixed(3));
+function renderModels(list, def) {
+  const first = !MODELS.length;
+  MODELS = list;
+  if (!currentModel || !MODELS.some(m => m.key === currentModel && m.available)) currentModel = def;
+  const sel = $("model");
+  sel.innerHTML = MODELS.map(m => `<option value="${m.key}" ${m.available ? "" : "disabled"}>${m.name}${m.available ? "" : " (not trained yet)"}</option>`).join("");
+  sel.value = currentModel || "";
+  renderModelInfo();
+  const best = Math.max(...MODELS.filter(m => m.test_map50 != null).map(m => m.test_map50));
+  $("historyCards").innerHTML = MODELS.map((m, i) => `
+    <button class="hcard ${m.key === currentModel ? "sel" : ""} ${m.available ? "" : "off"}" data-key="${m.key}" ${m.available ? "" : "disabled"}>
+      <span class="step">Model ${i + 1}</span>
+      <span class="hname">${m.name.replace(/^\d+\.\s*/, "")}</span>
+      <span class="hmap">${m.test_map50 == null ? "–" : m.test_map50.toFixed(3)}<small>test mAP50</small></span>
+      <span class="hbar"><i style="width:${m.test_map50 ? Math.max(4, (m.test_map50 - 0.6) / 0.25 * 100) : 0}%"></i></span>
+      ${m.test_map50 === best ? '<span class="hbadge">Best score</span>' : ""}
+      <span class="hnote">${m.note || ""}</span>
+    </button>`).join("");
+  document.querySelectorAll(".hcard").forEach(b => b.onclick = () => { if (!b.disabled) { selectModel(b.dataset.key); $("inspect").scrollIntoView(); } });
+  if (first) $("compareBtn").disabled = !currentImage;
+}
+function renderModelInfo() {
+  const m = MODELS.find(x => x.key === currentModel);
+  if (!m) { $("mscore").innerHTML = ""; $("mnote").textContent = "No trained model found."; return; }
+  $("mscore").innerHTML = `<span>test mAP50 <b>${fmt3(m.test_map50)}</b></span><span>mAP50-95 <b>${fmt3(m.test_map)}</b></span>` +
+    (m.cross_map50 != null ? `<span>other dataset <b>${m.cross_map50.toFixed(3)}</b></span>` : "");
+  $("mnote").textContent = (m.note || "") + (m.test_note ? ` (${m.test_note})` : "");
+}
+function selectModel(key) {
+  currentModel = key; $("model").value = key; renderModelInfo();
+  document.querySelectorAll(".hcard").forEach(b => b.classList.toggle("sel", b.dataset.key === key));
+  if (currentImage) detect(currentImage);
+}
+$("model").onchange = e => selectModel(e.target.value);
+
 let lastRuns = null;
 async function refresh() {
   try {
     const s = await (await fetch("/api/status")).json();
-    const modelRun = s.model ? s.model.split(/[\\/]/).slice(-3, -2)[0] : null;
+    const nAvail = (s.models || []).filter(m => m.available).length;
     $("srv-dot").className = "dot on";
-    $("srv-text").textContent = modelRun ? `Model: ${modelRun} on ${s.device}` : "No trained model found";
+    $("srv-text").textContent = nAvail ? `${nAvail} models ready · ${s.device}` : "No trained model found";
+    renderModels(s.models || [], s.default_model);
     const runs = s.runs;
     const live = [...runs].reverse().find(r => ["training", "stalled", "starting"].includes(r.state)) || runs[runs.length - 1];
     renderLive(live); lastRuns = runs; renderChart(runs); renderProject(s.project || {});
@@ -509,18 +595,18 @@ async function detect(dataUrl) {
   $("busy").hidden = false; $("error").textContent = "";
   try {
     const r = await fetch("/api/predict", { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image: dataUrl, conf: parseFloat($("conf").value) }) });
+      body: JSON.stringify({ image: dataUrl, conf: parseFloat($("conf").value), model: currentModel }) });
     const res = await r.json();
     if (!r.ok) throw new Error(res.error || "Detection failed.");
     last = res; drawBoxes(res);
-    $("timing").textContent = `${res.detections.length} item${res.detections.length === 1 ? "" : "s"} in ${Math.round(res.ms)} ms`;
+    $("timing").textContent = `${res.model_name.replace(/^\d+\.\s*/, "")}: ${res.detections.length} item${res.detections.length === 1 ? "" : "s"} in ${Math.round(res.ms)} ms`;
     renderLedger();
   } catch (e) {
     $("error").textContent = e.message.includes("Failed to fetch") ? "Can't reach the local server. Start it with python server.py in the webapp folder." : e.message;
   } finally { $("busy").hidden = true; }
 }
 function showImage(dataUrl) {
-  stopCamera(); currentImage = dataUrl;
+  stopCamera(); currentImage = dataUrl; $("compareBtn").disabled = false; $("compare").hidden = true;
   $("empty").hidden = true; $("figure").hidden = false; $("photo").hidden = false; $("video").hidden = true;
   $("overlay").innerHTML = ""; $("photo").src = dataUrl; detect(dataUrl);
 }
@@ -546,6 +632,33 @@ async function startCamera() {
 }
 function stopCamera() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } $("snap").hidden = true; }
 $("cam").onclick = $("cam2").onclick = startCamera;
+
+async function compareAll() {
+  if (!currentImage) return;
+  const avail = MODELS.filter(m => m.available), tgt = target.value, body = $("compareBody");
+  $("compare").hidden = false; $("compareBtn").disabled = true;
+  body.innerHTML = avail.map(m => `<tr id="cmp-${m.key}" class="${m.key === currentModel ? "cur" : ""}"><td><b>${m.name}</b></td><td class="num">…</td><td class="num"></td><td class="num"></td><td></td></tr>`).join("");
+  let done = 0;
+  for (const m of avail) {
+    $("compareState").textContent = `running ${++done} of ${avail.length}…`;
+    const row = $("cmp-" + m.key);
+    try {
+      const r = await fetch("/api/predict", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: currentImage, conf: parseFloat($("conf").value), model: m.key }) });
+      const res = await r.json();
+      if (!r.ok) throw new Error(res.error);
+      const n = res.detections.length, inBin = res.detections.filter(d => streamOf(d.name) === tgt).length;
+      const counts = {};
+      res.detections.forEach(d => counts[pretty(d.name)] = (counts[pretty(d.name)] || 0) + 1);
+      row.innerHTML = `<td><b>${m.name}</b><br><small>test mAP50 ${fmt3(m.test_map50)}</small></td><td class="num">${n}</td>
+        <td class="num">${n ? Math.round(inBin / n * 100) + "%" : "–"}</td><td class="num">${Math.round(res.ms)} ms</td>
+        <td>${Object.entries(counts).map(([k, v]) => `${v}× ${k}`).join(", ") || "<small>nothing found</small>"}</td>`;
+    } catch (e) { row.innerHTML = `<td><b>${m.name}</b></td><td colspan="4"><small>${e.message}</small></td>`; }
+  }
+  $("compareState").textContent = `purity = share of items for the ${STREAMS[tgt].name} bin`;
+  $("compareBtn").disabled = false;
+}
+$("compareBtn").onclick = compareAll;
 $("snap").onclick = () => {
   const v = $("video"), c = document.createElement("canvas");
   c.width = v.videoWidth; c.height = v.videoHeight; c.getContext("2d").drawImage(v, 0, 0);
