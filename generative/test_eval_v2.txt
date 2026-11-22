@@ -1,0 +1,80 @@
+PS D:\E-Waste Dataset.v1i.yolov8> python eval_test.py "D:\ewaste_runs\final_v2\weights\best.pt" final_v2 --device 0 --data D:\ewaste_v2\data.yaml --imgsz 512
+Ultralytics 8.4.180  Python-3.14.3 torch-2.13.0+cu130 CUDA:0 (NVIDIA GeForce RTX 4060 Laptop GPU, 8188MiB)
+YOLO26n summary (fused): 121 layers, 2,405,530 parameters, 0 gradients, 5.5 GFLOPs
+WARNING val: Slow image access detected (ping: 0.3±0.2 ms, read: 1.6±0.7 MB/s, size: 24.7 KB). Use local storage instead of remote/mounted storage for better performance. See https://docs.ultralytics.com/guides/model-training-tips
+val: Scanning D:\ewaste_v2\test\labels... 3307 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 3307/3307 424.6it/s 7.8s
+val: New cache created: D:\ewaste_v2\test\labels.cache
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 414/414 9.4it/s 44.1s
+                   all       3307       4253       0.82      0.768      0.812      0.656
+       Air-Conditioner         20         34      0.619      0.471      0.552      0.398
+             Bar-Phone         18         18      0.871          1      0.995      0.906
+               Battery         49         95      0.824      0.642       0.78      0.633
+Blood-Pressure-Monitor         92         92      0.984          1      0.995      0.995
+                Boiler        111        114      0.753       0.57      0.662      0.388
+           CRT-Monitor          7          9      0.706      0.444      0.569      0.458
+                CRT-TV         22         22      0.861      0.545      0.664       0.52
+            Calculator         25         25      0.713       0.92      0.894      0.846
+           Ceiling-Fan          8         12      0.592      0.833      0.869      0.715
+      Christmas-Lights          7         70      0.781      0.102      0.249     0.0669
+          Clothes-Iron         31         32      0.982      0.938      0.962      0.799
+        Coffee-Machine         33         33      0.546      0.455      0.456       0.37
+Compact-Fluorescent-Lamps          9          9          1      0.978      0.995      0.773
+     Computer-Keyboard        112        134      0.769      0.851      0.901      0.749
+        Computer-Mouse        151        161      0.783      0.882      0.879      0.671
+       Cooling-Display        220        224      0.991      0.991      0.995      0.983
+            Desktop-PC         20         20      0.634      0.521        0.7      0.577
+  Digital-Oscilloscope         46         52      0.949      0.714      0.864      0.575
+            Dishwasher         32         32      0.698      0.794      0.831      0.519
+                 Drone        218        218      0.952       0.95      0.949      0.652
+      Electric-Bicycle          6          6      0.917          1      0.995      0.875
+       Electric-Guitar        240        252      0.985      0.992      0.995      0.948
+Electrocardiograph-Machine          8          8      0.812          1      0.982      0.927
+   Electronic-Keyboard         59         62      0.849      0.919      0.937      0.703
+           Exhaust-Fan         11         11       0.43      0.455      0.428      0.242
+            Flashlight        108        108      0.981      0.973      0.991       0.85
+    Flat-Panel-Monitor        107        130      0.837      0.828      0.846      0.656
+         Flat-Panel-TV         37         37      0.645      0.649       0.67      0.562
+             Floor-Fan         21         21      0.968          1      0.995      0.896
+               Freezer          6          6      0.882          1      0.995      0.794
+         Glucose-Meter         79         85      0.954      0.976       0.99      0.897
+                   HDD         27         29      0.801      0.828      0.921      0.871
+             Headphone          4          4       0.88          1      0.995      0.895
+              LED-Bulb         21         25      0.893       0.84      0.903       0.62
+                Laptop        208        254      0.848      0.827      0.886      0.766
+             Microwave         69         71      0.625      0.563      0.511      0.411
+          Music-Player         35         35          1       0.94      0.987      0.889
+        Network-Switch         13         13      0.755      0.923      0.919      0.855
+                  Oven        155        176      0.772      0.795      0.783       0.53
+                   PCB         52         52      0.981      0.995      0.992      0.961
+Patient-Monitoring-System         12         12          1      0.994      0.995       0.71
+    Photovoltaic-Panel        172        205      0.721      0.727      0.764      0.642
+         Power-Adapter          6          6      0.819      0.333      0.348      0.304
+               Printer          3          3          1          0      0.174      0.138
+             Projector         56         56        0.8      0.946      0.939      0.868
+        Pulse-Oximeter          8          8      0.684      0.275      0.787      0.292
+            Range-Hood         45         53      0.677      0.623      0.603       0.36
+          Refrigerator        117        151      0.777      0.738      0.785      0.617
+          Rotary-Mower         34         39       0.96          1      0.994      0.845
+                Router         55         61      0.895      0.984      0.971      0.929
+                   SSD          4          4          1          0          0          0
+                Server         27         61      0.526       0.59        0.6      0.418
+            Smartphone        129        202      0.873      0.946      0.888      0.808
+        Smoke-Detector         38         38      0.864      0.974      0.955      0.688
+                 Stove         53         62       0.76      0.613        0.7      0.377
+Straight-Tube-Fluorescent-Lamp         59         74      0.955       0.87      0.892      0.677
+           Street-Lamp         35         39      0.643      0.795      0.837      0.626
+     TV-Remote-Control         20         23      0.832      0.957      0.979      0.962
+            Table-Lamp         16         18      0.792      0.944      0.909      0.737
+         Telephone-Set         53         53      0.962      0.962      0.966      0.688
+               Toaster          6          6      0.912      0.333      0.635      0.378
+       USB-Flash-Drive         50         56      0.813      0.804      0.884      0.704
+        Vacuum-Cleaner          5          5      0.671       0.82      0.938      0.564
+       Washing-Machine        150        194       0.94      0.892      0.948      0.809
+       Water-Dispenser         19         31      0.829      0.941      0.984      0.881
+          Game-Console          2          2      0.579        0.5       0.62      0.533
+Speed: 0.6ms preprocess, 1.9ms inference, 0.0ms loss, 1.1ms postprocess per image
+Results saved to D:\E-Waste Dataset.v1i.yolov8\runs\detect\test_final_v2
+
+final_v2: mAP50 = 0.812   mAP50-95 = 0.656
+Per-class results saved to per_class_final_v2.csv
+PS D:\E-Waste Dataset.v1i.yolov8> 

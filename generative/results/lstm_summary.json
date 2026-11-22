@@ -1,0 +1,10 @@
+{
+  "window_rule": {
+    "k": 7,
+    "t": 3
+  },
+  "lstm_threshold": 0.7999999999999998,
+  "train_sequences": 3000,
+  "test_sequences": 1000,
+  "seq_len": 120
+}

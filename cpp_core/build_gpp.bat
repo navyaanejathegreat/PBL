@@ -10,12 +10,13 @@ if not exist third_party\eigen\Eigen (
 if not exist bin mkdir bin
 if not exist results mkdir results
 set FLAGS=-std=c++14 -O2 -Iinclude -Ithird_party\eigen
-set CORE=src\mlp.cpp src\data.cpp src\neurons.cpp src\learning_rules.cpp
+set CORE=src\mlp.cpp src\data.cpp src\neurons.cpp src\learning_rules.cpp src\qc_metrics.cpp
 echo Building unit_tests ... & g++ %FLAGS% tests\unit_tests.cpp %CORE% -o bin\unit_tests.exe || goto :fail
 echo Building neurons ...    & g++ %FLAGS% src\neurons_main.cpp %CORE% -o bin\neurons.exe || goto :fail
 echo Building sandbox ...    & g++ %FLAGS% src\sandbox_main.cpp %CORE% -o bin\sandbox.exe || goto :fail
 echo Building mlp_train ...  & g++ %FLAGS% src\mlp_train_main.cpp %CORE% -o bin\mlp_train.exe || goto :fail
 echo Building learning_rules ... & g++ %FLAGS% src\learning_rules_main.cpp %CORE% -o bin\learning_rules.exe || goto :fail
+echo Building qc_app ...     & g++ %FLAGS% src\qc_app_main.cpp src\qc_metrics.cpp -o bin\qc_app.exe || goto :fail
 echo.
 echo Build OK. Running unit tests:
 bin\unit_tests.exe

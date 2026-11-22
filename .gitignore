@@ -27,3 +27,5 @@ cpp_core/build/
 cpp_core/third_party/
 webapp/static/index_light_backup.html
 .vscode/
+cpp_core/qc_input/
+generative/results/*.pt

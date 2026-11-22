@@ -1,0 +1,14 @@
+{
+  "rare_class": "Computer-Mouse",
+  "rare_train_n": 60,
+  "natural_rare": "Christmas-Lights",
+  "natural_rare_train_n": 94,
+  "device": "cpu",
+  "vae_final": {
+    "epoch": 40,
+    "loss": 591.1682257284597,
+    "recon": 574.5115302482054,
+    "kl": 16.65669198896695,
+    "beta": 1.0
+  }
+}

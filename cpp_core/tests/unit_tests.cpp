@@ -7,6 +7,7 @@
 #include "learning_rules.hpp"
 #include "mlp.hpp"
 #include "neurons.hpp"
+#include "qc_metrics.hpp"
 
 using namespace nn;
 
@@ -105,6 +106,27 @@ int main() {
         double e0 = rbm.train_epoch(V, 0.1, 10), e1 = e0;
         for (int e = 0; e < 60; ++e) e1 = rbm.train_epoch(V, 0.1, 10);
         CHECK(e1 < 0.5 * e0, "RBM reconstruction error falls with CD-1");
+    }
+
+    std::cout << "Quality-control metrics\n";
+    {
+        qc::Box a, b;
+        a.cx = 0.5; a.cy = 0.5; a.w = 0.2; a.h = 0.2;
+        b = a;
+        CHECK(std::abs(qc::iou(a, b) - 1.0) < 1e-12, "IoU of identical boxes is 1");
+        b.cx = 0.6;  // half overlap in x: inter 0.1*0.2, union 0.06
+        CHECK(std::abs(qc::iou(a, b) - 1.0 / 3) < 1e-12, "IoU of half-shifted boxes is 1/3");
+        CHECK(std::abs(qc::average_precision({1, 1, 1}, 3) - 0.995) < 1e-9, "AP is 0.995 for a perfect ranking (101-point, as Ultralytics)");
+        CHECK(qc::average_precision({0, 0}, 2) == 0.0, "AP is 0 when nothing matches");
+        std::vector<qc::Box> gt(2, a), pr(2, a);
+        gt[1].image = pr[1].image = 1; gt[1].cls = pr[1].cls = 1;
+        qc::Report r = qc::evaluate(gt, pr, 2, 0.25);
+        CHECK(std::abs(r.map50 - 0.995) < 1e-9 && std::abs(r.macro_f1 - 1.0) < 1e-12, "perfect detections give mAP 0.995 and F1 1");
+        std::vector<std::string> streams = {"it", "battery"}, names = {"Computer-Mouse", "Battery"};
+        pr[1].cls = 0;  // the battery is detected as a mouse
+        qc::SortReport s = qc::sort_quality(gt, pr, streams, names, 0.25, 0.95);
+        CHECK(s.bins[5].items == 2 && s.bins[5].correct == 1 && s.bins[5].hazards == 1,
+              "a battery in the IT bin lowers purity and raises a hazard");
     }
 
     std::cout << (failures ? "\nSOME TESTS FAILED\n" : "\nALL TESTS PASSED\n");

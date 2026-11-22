@@ -1,0 +1,78 @@
+class_id,name,groups,action,merge_into,note
+0,Air-Conditioner,99,keep,,
+1,Bar-Phone,109,keep,,
+2,Battery,386,keep,,
+3,Blood-Pressure-Monitor,554,keep,,
+4,Boiler,635,keep,,
+5,CRT-Monitor,44,keep,,
+6,CRT-TV,107,keep,,
+7,Calculator,155,keep,,
+8,Camera,1,drop,,10 or fewer source photos: cannot be learned or tested
+9,Ceiling-Fan,44,keep,,
+10,Christmas-Lights,41,keep,,
+11,Clothes-Iron,187,keep,,
+12,Coffee-Machine,58,keep,,
+13,Compact-Fluorescent-Lamps,50,keep,,
+14,Computer-Keyboard,792,keep,,
+15,Computer-Mouse,1001,keep,,
+16,Cooled-Dispenser,110,merge,Water-Dispenser,too few alone; merged with a similar class
+17,Cooling-Display,1216,keep,,
+18,Dehumidifier,2,drop,,10 or fewer source photos: cannot be learned or tested
+19,Desktop-PC,117,keep,,
+20,Digital-Oscilloscope,273,keep,,
+21,Dishwasher,196,keep,,
+22,Drone,1118,keep,,
+23,Electric-Bicycle,34,keep,,
+24,Electric-Guitar,1383,keep,,
+25,Electrocardiograph-Machine,60,keep,,
+26,Electronic-Keyboard,312,keep,,
+27,Exhaust-Fan,54,keep,,
+28,Flashlight,411,keep,,
+29,Flat-Panel-Monitor,546,keep,,
+30,Flat-Panel-TV,206,keep,,
+31,Floor-Fan,118,keep,,
+32,Freezer,26,keep,,rare: candidate for VAE augmentation
+33,Glucose-Meter,461,keep,,
+34,HDD,249,keep,,
+35,Hair-Dryer,1,drop,,10 or fewer source photos: cannot be learned or tested
+36,Headphone,27,keep,,rare: candidate for VAE augmentation
+37,LED-Bulb,118,keep,,
+38,Laptop,1209,keep,,
+39,Microwave,395,keep,,
+40,Music-Player,199,keep,,
+41,Neon-Sign,5,drop,,10 or fewer source photos: cannot be learned or tested
+42,Network-Switch,130,keep,,
+43,Non-Cooled-Dispenser,21,merge,Water-Dispenser,too few alone; merged with a similar class
+44,Oven,888,keep,,
+45,PCB,301,keep,,
+46,Patient-Monitoring-System,63,keep,,
+47,Photovoltaic-Panel,970,keep,,
+48,PlayStation-5,17,merge,Game-Console,too few alone; merged with a similar class
+49,Power-Adapter,34,keep,,
+50,Printer,15,keep,,rare: candidate for VAE augmentation
+51,Projector,302,keep,,
+52,Pulse-Oximeter,82,keep,,
+53,Range-Hood,259,keep,,
+54,Refrigerator,625,keep,,
+55,Rotary-Mower,214,keep,,
+56,Router,262,keep,,
+57,SSD,26,keep,,rare: candidate for VAE augmentation
+58,Server,186,keep,,
+59,Smart-Watch,1,drop,,10 or fewer source photos: cannot be learned or tested
+60,Smartphone,664,keep,,
+61,Smoke-Detector,204,keep,,
+62,Soldering-Iron,1,drop,,10 or fewer source photos: cannot be learned or tested
+63,Speaker,4,drop,,10 or fewer source photos: cannot be learned or tested
+64,Stove,275,keep,,
+65,Straight-Tube-Fluorescent-Lamp,340,keep,,
+66,Street-Lamp,200,keep,,
+67,TV-Remote-Control,182,keep,,
+68,Table-Lamp,88,keep,,
+69,Tablet,10,drop,,10 or fewer source photos: cannot be learned or tested
+70,Telephone-Set,300,keep,,
+71,Toaster,35,keep,,
+72,Tumble-Dryer,4,drop,,10 or fewer source photos: cannot be learned or tested
+73,USB-Flash-Drive,281,keep,,
+74,Vacuum-Cleaner,31,keep,,
+75,Washing-Machine,848,keep,,
+76,Xbox-Series-X,5,merge,Game-Console,too few alone; merged with a similar class

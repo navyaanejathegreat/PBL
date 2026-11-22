@@ -30,14 +30,15 @@ else()
   add_compile_options(-O2 -Wall)
 endif()
 
-add_library(nncore STATIC src/mlp.cpp src/data.cpp src/neurons.cpp src/learning_rules.cpp)
+add_library(nncore STATIC src/mlp.cpp src/data.cpp src/neurons.cpp src/learning_rules.cpp src/qc_metrics.cpp)
 target_include_directories(nncore PUBLIC include ${EIGEN_INCLUDE})
 
 add_executable(sandbox    src/sandbox_main.cpp)
 add_executable(neurons    src/neurons_main.cpp)
 add_executable(mlp_train  src/mlp_train_main.cpp)
 add_executable(learning_rules src/learning_rules_main.cpp)
-foreach(t sandbox neurons mlp_train learning_rules)
+add_executable(qc_app     src/qc_app_main.cpp)
+foreach(t sandbox neurons mlp_train learning_rules qc_app)
   target_link_libraries(${t} PRIVATE nncore)
 endforeach()
 
