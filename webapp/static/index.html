@@ -522,7 +522,11 @@ async function refresh() {
     const nAvail = (s.models || []).filter(m => m.available).length;
     $("srv-dot").className = "dot on";
     $("srv-text").textContent = nAvail ? `${nAvail} models ready · ${s.device}` : "No trained model found";
-    renderModels(s.models || [], s.default_model);
+    if (!s.models) {  // an old copy of server.py is answering
+      $("srv-dot").className = "dot off";
+      $("srv-text").textContent = "Old server running: restart it";
+      $("mnote").textContent = "The page is talking to an older copy of server.py. Close every terminal running it (Ctrl+C), then run python webapp\\server.py again.";
+    } else renderModels(s.models, s.default_model);
     const runs = s.runs;
     const live = [...runs].reverse().find(r => ["training", "stalled", "starting"].includes(r.state)) || runs[runs.length - 1];
     renderLive(live); lastRuns = runs; renderChart(runs); renderProject(s.project || {});

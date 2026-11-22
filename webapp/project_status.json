@@ -51,6 +51,13 @@
       "map50": 0.833,
       "map": 0.684,
       "note": "Best plain model. 20.4M parameters, 8.7 ms per image (4.6x slower than YOLO26n)"
+    },
+    {
+      "model": "YOLO26n + Bangladeshi photos",
+      "test_set": "ewaste_v2 test, 3,307 images",
+      "map50": 0.806,
+      "map": 0.653,
+      "note": "Other-dataset mAP50 0.50 to 0.92 after adding its training photos"
     }
   ],
   "dataset": [

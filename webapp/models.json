@@ -55,11 +55,12 @@
     },
     {
       "key": "m7_bangladesh",
-      "name": "7. YOLO26n + Bangladeshi photos",
+      "name": "7. YOLO26n + Bangladeshi photos (works at a new site)",
       "path": "D:/ewaste_runs/final_v4_ft/weights/best.pt",
-      "test_map50": null,
-      "test_map": null,
-      "note": "Fine-tuned with an independent dataset's training photos. Test scores pending."
+      "test_map50": 0.806,
+      "test_map": 0.653,
+      "note": "Fine-tuned with 1,334 photos from an independent dataset. Other-dataset score 0.50 to 0.92; own test 0.812 to 0.806.",
+      "cross_map50": 0.916
     }
   ]
 }
