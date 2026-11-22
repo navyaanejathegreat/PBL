@@ -1,7 +1,7 @@
 {
   "title": "E-Waste Detection and Recycling Quality Controller",
   "deadline": "2026-11-23",
-  "updated": "2026-11-21",
+  "updated": "2026-11-22",
   "test_results": [
     {
       "model": "Baseline (original splits)",
@@ -30,6 +30,27 @@
       "map50": 0.824,
       "map": 0.677,
       "note": "9.5M parameters vs 2.5M; 3.6 ms per image vs 1.9 ms. +1.2 mAP50 for ~2x slower inference"
+    },
+    {
+      "model": "YOLO26n + 3,991 Open Images photos (fine-tuned)",
+      "test_set": "ewaste_v2 test, 3,307 images",
+      "map50": 0.813,
+      "map": 0.657,
+      "note": "Same as v2 overall. Better: Microwave, Dishwasher, Oven, Printer. Worse: Flat-Panel-TV, Stove, Toaster"
+    },
+    {
+      "model": "YOLO26s + test-time augmentation",
+      "test_set": "ewaste_v2 test, 3,307 images",
+      "map50": 0.829,
+      "map": 0.685,
+      "note": "Highest mAP50-95. Flips/rescales each test image and merges results; 8.4 ms per image instead of 3.6 ms"
+    },
+    {
+      "model": "YOLO26m (ewaste_v2, 30 epochs)",
+      "test_set": "ewaste_v2 test, 3,307 images",
+      "map50": 0.833,
+      "map": 0.684,
+      "note": "Best plain model. 20.4M parameters, 8.7 ms per image (4.6x slower than YOLO26n)"
     }
   ],
   "dataset": [
@@ -91,19 +112,23 @@
     },
     {
       "item": "Classification model on crops",
-      "status": "to do"
+      "status": "done",
+      "note": "Small CNN on crops: 63-69% test accuracy, used in the VAE experiment"
     },
     {
       "item": "VAE for rare classes, LSTM stream monitor",
-      "status": "to do"
+      "status": "done",
+      "note": "VAE: rare-class F1 0.01 to 0.46 (oversampling 0.70). LSTM: F1 0.73 vs 0.65 for the best window rule"
     },
     {
       "item": "C++ demo app with metrics",
-      "status": "to do"
+      "status": "done",
+      "note": "qc_app on test set: mAP50 0.794, macro F1 0.759, IoU 0.90, purity 79%, 416 FPS network"
     },
     {
       "item": "Report, slides, demo video",
-      "status": "to do"
+      "status": "in progress",
+      "note": "Report drafted; slides and video to do"
     }
   ]
 }
