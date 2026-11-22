@@ -1,0 +1,11 @@
+metric,value
+map50,0.4988
+map50_95,0.3502
+macro_f1,0.5336
+mean_iou,0.8862
+overall_purity,0.6124
+recovery,0.5333
+contaminated_bins,2
+fps_end_to_end,39.1741
+fps_network,431.8100
+controller_ms,0.0000
