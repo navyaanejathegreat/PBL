@@ -16,3 +16,14 @@ venv/
 *.sqlite-wal
 *.sqlite-shm
 duplicate_review/
+# large or generated files (kept on the laptop, not on GitHub)
+weights/
+*.cache
+*.bin
+dl_log.txt
+cpp_core/crops/
+cpp_core/bin/
+cpp_core/build/
+cpp_core/third_party/
+webapp/static/index_light_backup.html
+.vscode/

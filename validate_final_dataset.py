@@ -1,8 +1,14 @@
 from pathlib import Path
 from collections import defaultdict
 import hashlib
+import sys
 
-ROOT = Path(r"D:\ewaste_final")
+import yaml
+
+# Usage: python validate_final_dataset.py [dataset_folder]   (default D:\ewaste_final)
+ROOT = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(r"D:\ewaste_final")
+with open(ROOT / "data.yaml", encoding="utf-8") as _f:
+    NC = int(yaml.safe_load(_f)["nc"])
 SPLITS = ["train", "valid", "test"]
 EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
@@ -64,7 +70,7 @@ for split in SPLITS:
                 )
                 continue
 
-            if not 0 <= cls < 77:
+            if not 0 <= cls < NC:
                 errors.append(
                     f"{split}/{label.name}:{line_no}: invalid class ID {cls}"
                 )

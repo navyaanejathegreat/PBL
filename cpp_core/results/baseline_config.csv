@@ -1,0 +1,16 @@
+run,baseline
+# hyperparameters (chosen by us)
+hidden,256-128
+activation,relu
+init,he
+optimizer,momentum
+lr,0.01
+momentum,0.9
+l2,0
+batch,64
+epochs,20
+seed,0
+normalize,1
+augment_hflip,0
+# parameters (learned by backprop)
+learned_parameters,296586

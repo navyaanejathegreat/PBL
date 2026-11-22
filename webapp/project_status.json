@@ -1,0 +1,109 @@
+{
+  "title": "E-Waste Detection and Recycling Quality Controller",
+  "deadline": "2026-11-23",
+  "updated": "2026-11-21",
+  "test_results": [
+    {
+      "model": "Baseline (original splits)",
+      "test_set": "ewaste_final test, 1,955 images",
+      "map50": 0.752,
+      "map": 0.594,
+      "note": "Partly inflated: it trained on copies of some test images"
+    },
+    {
+      "model": "Leak-free (ewaste_final)",
+      "test_set": "ewaste_final test, 1,955 images",
+      "map50": 0.757,
+      "map": 0.596,
+      "note": "Honest score. Network-Switch and Pulse-Oximeter score 0: no training images in the old split"
+    },
+    {
+      "model": "Final (ewaste_v2, 40 epochs)",
+      "test_set": "ewaste_v2 test, 3,307 images",
+      "map50": 0.812,
+      "map": 0.656,
+      "note": "Leak-free grouped split, 66 classes. 1.9 ms per image on the RTX 4060. Weak: SSD, Printer, Christmas-Lights, Power-Adapter"
+    },
+    {
+      "model": "YOLO26s (ewaste_v2, 30 epochs)",
+      "test_set": "ewaste_v2 test, 3,307 images",
+      "map50": 0.824,
+      "map": 0.677,
+      "note": "9.5M parameters vs 2.5M; 3.6 ms per image vs 1.9 ms. +1.2 mAP50 for ~2x slower inference"
+    }
+  ],
+  "dataset": [
+    {
+      "stage": "Roboflow export",
+      "images": 33323,
+      "note": "77 classes, 2 augmented copies of each photo"
+    },
+    {
+      "stage": "ewaste_clean",
+      "images": 33319,
+      "note": "Polygons converted to boxes; 4 empty-label images dropped"
+    },
+    {
+      "stage": "ewaste_final",
+      "images": 32510,
+      "note": "Byte-identical duplicates removed"
+    },
+    {
+      "stage": "ewaste_v2",
+      "images": 32461,
+      "note": "17,827 real photos grouped; every group in one split; 66 classes"
+    }
+  ],
+  "checklist": [
+    {
+      "item": "Clean dataset, leakage-safe splits",
+      "status": "done"
+    },
+    {
+      "item": "YOLO detector (baseline and leak-free)",
+      "status": "done",
+      "note": "Benchmarked YOLO26n vs YOLO26s"
+    },
+    {
+      "item": "Final YOLO on ewaste_v2",
+      "status": "done",
+      "note": "Test mAP50 0.812, mAP50-95 0.656"
+    },
+    {
+      "item": "Tensor sandbox, SVD (C++)",
+      "status": "done",
+      "note": "90% of variance in 50 of 1,024 components"
+    },
+    {
+      "item": "Neurons and from-scratch MLP (C++)",
+      "status": "done",
+      "note": "Gradient check error ~1e-10; MLP 50% test accuracy on 10 classes"
+    },
+    {
+      "item": "Optimizer comparison and ablations",
+      "status": "done",
+      "note": "Nesterov/Momentum/SGD ~50% test; GD needs 300 epochs to reach 46%; L2 best ablation (51.5%)"
+    },
+    {
+      "item": "Hebbian, competitive, Boltzmann learning",
+      "status": "done",
+      "note": "Oja matches PC1 (cos 0.999); clustering 2.6x chance; RBM recon 0.20 to 0.11"
+    },
+    {
+      "item": "Classification model on crops",
+      "status": "to do"
+    },
+    {
+      "item": "VAE for rare classes, LSTM stream monitor",
+      "status": "to do"
+    },
+    {
+      "item": "C++ demo app with metrics",
+      "status": "to do"
+    },
+    {
+      "item": "Report, slides, demo video",
+      "status": "to do"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+run,opt_gd
+# hyperparameters (chosen by us)
+hidden,256-128
+activation,relu
+init,he
+optimizer,gd
+lr,0.5
+momentum,0.9
+l2,0
+batch,5494
+epochs,30
+seed,0
+normalize,1
+augment_hflip,0
+# parameters (learned by backprop)
+learned_parameters,296586

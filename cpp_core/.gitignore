@@ -1,0 +1,5 @@
+bin/
+build/
+third_party/
+crops/
+*.exe

@@ -146,11 +146,10 @@ for split in SPLITS:
     for image_path in image_paths:
         label_path = source_labels / f"{image_path.stem}.txt"
 
-        short_name = hashlib.sha1(
-            f"{split}/{image_path.name}".encode("utf-8")
-        ).hexdigest() + image_path.suffix.lower()
-
-        destination_label = output_labels / f"{Path(short_name).stem}.txt"
+        # Label and image must share the same stem, or YOLO cannot pair them.
+        # (Earlier version saved labels under a SHA-1 name but kept the
+        # original image name, so the two no longer matched.)
+        destination_label = output_labels / f"{image_path.stem}.txt"
 
         if not convert_label(
             label_path,

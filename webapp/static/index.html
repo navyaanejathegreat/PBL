@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E-Waste Sorting Inspector</title>
+<style>
+  @font-face { font-family: "Plus Jakarta Sans"; src: url("/fonts/plus-jakarta-sans.woff2") format("woff2");
+    font-weight: 200 800; font-display: swap; }
+  :root {
+    --bg: #0B1612;          /* deep spruce, near black */
+    --bg-2: #0F1D18;
+    --card: #132520;
+    --card-2: #1A302A;
+    --line: #23392F;
+    --text: #EAF3EE;
+    --mute: #93AA9F;
+    --green: #2E9E6E;       /* spruce green: primary buttons */
+    --mint: #7EE0B0;        /* highlights, checks */
+    --s-temp: #6FA8DC; --s-screen: #A891EC; --s-lamp: #EB8A4E;
+    --s-large: #7DC48F; --s-small: #E479AE; --s-it: #4CC2C8;
+    --hazard: #F0675C; --ok: #7EE0B0; --warn: #EBB061; --bad: #F0675C;
+    --font: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
+    --radius: 20px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--font); -webkit-font-smoothing: antialiased; }
+  :focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; border-radius: 6px; }
+  button, select, input { font: inherit; color: inherit; }
+  [hidden] { display: none !important; }
+  a { color: inherit; text-decoration: none; }
+  code { font-size: 13px; background: var(--card-2); padding: 1px 6px; border-radius: 6px; }
+  .wrap { width: min(1200px, 100% - 40px); margin: 0 auto; }
+
+  /* ---------- nav ---------- */
+  .nav { position: sticky; top: 0; z-index: 10; background: rgba(11,22,18,.82); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .nav .wrap { display: flex; align-items: center; gap: 28px; height: 68px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+  .mark { width: 30px; height: 30px; border-radius: 9px; background: var(--green); display: grid; place-items: center; }
+  .links { display: flex; gap: 24px; margin-left: auto; font-size: 15px; font-weight: 600; color: var(--mute); }
+  .links a:hover { color: var(--text); }
+  .server { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--mute); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mute); flex: none; }
+  .dot.on { background: var(--mint); } .dot.off { background: var(--bad); }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--line);
+    background: var(--card); padding: 11px 20px; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: pointer; }
+  .btn:hover { background: var(--card-2); }
+  .btn.primary { background: var(--green); border-color: var(--green); color: #fff; }
+  .btn.primary:hover { background: #33AE79; }
+  .btn.small { padding: 8px 14px; font-size: 14px; border-radius: 10px; }
+
+  /* ---------- hero ---------- */
+  .hero { text-align: center; padding: 72px 0 40px; }
+  .pill { display: inline-block; padding: 6px 14px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); font-size: 13px; font-weight: 600; color: var(--mint); }
+  .hero h1 { margin: 20px auto 18px; max-width: 17ch; font-size: clamp(40px, 5.8vw, 72px); line-height: 1.04; font-weight: 800; letter-spacing: -0.025em; }
+  .hero p.lead { margin: 0 auto; max-width: 56ch; color: var(--mute); font-size: 18px; }
+  .hero .ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 30px 0 26px; }
+  .checks { display: flex; gap: 10px 28px; justify-content: center; flex-wrap: wrap; list-style: none; margin: 0; padding: 0; font-weight: 600; font-size: 15px; }
+  .checks li { display: inline-flex; align-items: center; gap: 8px; }
+  .tick { width: 20px; height: 20px; border-radius: 50%; background: var(--green); display: inline-grid; place-items: center; flex: none; }
+
+  /* ---------- detector showcase ---------- */
+  .showcase { background: var(--bg-2); border: 1px solid var(--line); border-radius: 28px; padding: 14px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 14px; }
+  .stage { position: relative; min-height: 470px; border-radius: var(--radius); background: #08110E; overflow: hidden; display: grid; place-items: center; }
+  .stage.drag { outline: 2px dashed var(--mint); outline-offset: -10px; }
+  .empty { text-align: center; padding: 28px; max-width: 42ch; }
+  .empty h2 { margin: 0 0 8px; font-size: 26px; letter-spacing: -0.02em; line-height: 1.15; }
+  .empty p { margin: 0 0 20px; color: var(--mute); }
+  .figure { position: absolute; inset: 0; }
+  .figure img, .figure video { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .figure svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .busy { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(8,17,14,.6); font-weight: 700; }
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 12px 6px 4px; font-size: 14px; }
+  .toolbar label { display: flex; align-items: center; gap: 8px; color: var(--mute); }
+  .toolbar input[type=range] { accent-color: var(--mint); width: 130px; }
+  .toolbar output { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+  .timing { margin-left: auto; color: var(--mute); }
+  .err { color: var(--bad); font-weight: 700; font-size: 14px; margin: 6px 6px 0; }
+  .err:empty { display: none; }
+
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; min-width: 0; }
+  .ledger { display: flex; flex-direction: column; gap: 0; max-height: 560px; overflow: auto; }
+  .ledger h3, .panel h3 { margin: 0 0 12px; font-size: 16px; font-weight: 700; color: var(--mute); }
+  .target { display: grid; gap: 6px; font-size: 14px; color: var(--mute); }
+  .target select { padding: 10px 12px; border-radius: 10px; background: var(--card-2); border: 1px solid var(--line); }
+  .purity-row { display: flex; align-items: baseline; gap: 10px; margin: 16px 0 2px; }
+  .purity { font-size: 56px; font-weight: 800; line-height: .95; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .purity-label { color: var(--mute); font-size: 14px; }
+  .verdict { margin: 6px 0 12px; font-weight: 700; font-size: 15px; }
+  .verdict.ok { color: var(--ok); } .verdict.warn { color: var(--warn); } .verdict.bad { color: var(--bad); }
+  .hazard { margin: 0 0 12px; padding: 6px; border-radius: 12px; background: repeating-linear-gradient(-45deg, var(--hazard) 0 10px, #2A1517 10px 20px); }
+  .hazard span { display: block; background: #2A1517; color: #FFD9D5; font-weight: 700; font-size: 14px; padding: 8px 10px; border-radius: 8px; }
+  .streams, .items { list-style: none; margin: 0; padding: 0; }
+  .streams li { display: grid; grid-template-columns: 10px 1fr auto; gap: 3px 10px; align-items: center; padding: 6px 0; font-size: 14px; }
+  .sw { width: 10px; height: 10px; border-radius: 3px; }
+  .streams .n { font-weight: 800; font-variant-numeric: tabular-nums; }
+  .streams .track { grid-column: 2 / 4; height: 4px; background: var(--card-2); border-radius: 2px; overflow: hidden; }
+  .streams .track i { display: block; height: 100%; border-radius: 2px; }
+  .streams li.zero { color: var(--mute); }
+  .items { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13.5px; }
+  .items li { padding: 5px 0; display: grid; grid-template-columns: 10px 1fr auto; gap: 0 10px; align-items: baseline; }
+  .items li .sw { align-self: center; }
+  .items li small { grid-column: 2 / 4; color: var(--mute); }
+
+  /* ---------- sections ---------- */
+  section.block { padding: 88px 0 0; }
+  .head { text-align: center; margin-bottom: 32px; }
+  .head h2 { margin: 14px 0 10px; font-size: clamp(30px, 3.6vw, 44px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
+  .head p { margin: 0 auto; max-width: 56ch; color: var(--mute); }
+
+  .grid-train { display: grid; grid-template-columns: 320px minmax(0, 1fr) 340px; gap: 14px; }
+  .run-state { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: var(--text); }
+  .state-training .dot { background: var(--mint); animation: pulse 1.6s ease-in-out infinite; }
+  .state-stalled .dot { background: var(--bad); }
+  .state-finished .dot { background: var(--s-temp); }
+  @keyframes pulse { 50% { opacity: .3; } }
+  .panel h3.row { display: flex; align-items: center; gap: 10px; }
+  .panel h3 .right { margin-left: auto; font-weight: 500; font-size: 13px; }
+  .epoch { font-size: 54px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; margin: 6px 0 4px; font-variant-numeric: tabular-nums; }
+  .epoch span { font-size: 16px; font-weight: 500; color: var(--mute); letter-spacing: 0; }
+  .bar { height: 8px; background: var(--card-2); border-radius: 4px; overflow: hidden; margin: 10px 0 14px; }
+  .bar i { display: block; height: 100%; background: var(--mint); border-radius: 4px; transition: width .6s; }
+  .facts { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; }
+  .facts dt { color: var(--mute); }
+  .facts dd { margin: 0; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+  .alert { margin-top: 14px; padding: 10px 12px; border-radius: 12px; font-size: 13.5px; background: var(--card-2); border: 1px solid var(--line); }
+  .alert.bad { border-color: var(--bad); }
+  .chart-panel { display: flex; flex-direction: column; }
+  #chart { flex: 1; min-height: 230px; }
+  #chart svg { width: 100%; height: 100%; display: block; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 13px; color: var(--mute); margin-top: 6px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 16px; height: 3px; border-radius: 2px; display: inline-block; }
+  .scores { display: grid; gap: 14px; }
+  .score { display: grid; grid-template-columns: 1fr auto auto; gap: 0 16px; align-items: baseline; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+  .score:last-child { border-bottom: 0; padding-bottom: 0; }
+  .score .name { font-weight: 700; }
+  .score .big { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .score .small { font-size: 16px; font-weight: 700; color: var(--mute); font-variant-numeric: tabular-nums; }
+  .score .hdr { font-size: 12px; color: var(--mute); }
+  .score .note { grid-column: 1 / -1; color: var(--mute); font-size: 13px; margin-top: 4px; }
+
+  .pipeline { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; counter-reset: s; }
+  .pipeline li { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; counter-increment: s; }
+  .pipeline li::before { content: "Step " counter(s); display: inline-block; font-size: 12px; font-weight: 700; color: var(--mint); background: var(--card-2); padding: 3px 10px; border-radius: 999px; }
+  .pipeline b { display: block; margin-top: 14px; font-size: 34px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .pipeline .step-name { font-weight: 700; margin-top: 2px; }
+  .pipeline p { margin: 6px 0 0; color: var(--mute); font-size: 14px; }
+
+  .tally { display: flex; gap: 10px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .tally div { min-width: 120px; text-align: center; padding: 10px 16px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); font-size: 13px; color: var(--mute); }
+  .tally b { display: block; font-size: 26px; font-weight: 800; color: var(--text); }
+  .tally .done b { color: var(--ok); } .tally .prog b { color: var(--warn); }
+  .next { text-align: center; color: var(--mute); margin-bottom: 18px; } .next span { color: var(--text); font-weight: 700; }
+  .todo { list-style: none; margin: 0 auto; padding: 0; max-width: 760px; display: grid; gap: 8px; }
+  .todo li { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); font-weight: 600; }
+  .todo li::before { content: ""; flex: none; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--mute); }
+  .todo li.done { color: var(--mute); }
+  .todo li.done::before { background: var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3 3 7-7' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat; border-color: var(--green); }
+  .todo li.prog::before { border-color: var(--warn); background: linear-gradient(90deg, var(--warn) 50%, transparent 50%); }
+  .todo small { margin-left: auto; color: var(--mute); font-weight: 500; text-align: right; }
+
+  footer { margin-top: 96px; padding: 28px 0 40px; border-top: 1px solid var(--line); color: var(--mute); font-size: 14px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+
+  @media (max-width: 1080px) {
+    .showcase, .grid-train { grid-template-columns: 1fr; }
+    .ledger { max-height: none; }
+    .pipeline { grid-template-columns: repeat(2, 1fr); }
+    .links { display: none; }
+    .nav .server { margin-left: auto; }
+  }
+  @media (max-width: 560px) { .pipeline { grid-template-columns: 1fr; } .stage { min-height: 320px; } }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .state-training .dot { animation: none; } .bar i { transition: none; } }
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="mark" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.6 9"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.2-2.1"/><path d="M14 16l-3 3 3 3"/><path d="M8.3 13.3L7.6 9 3.3 9.7"/><path d="M9.3 5.3l1.2-2.1a1.8 1.8 0 0 1 3.1 0l4 7"/><path d="M13.7 9.5l3.9 0.6.6-4.3"/></svg></span>
+      E-Waste Inspector</a>
+    <nav class="links" aria-label="Sections">
+      <a href="#inspect">Inspect</a><a href="#training">Training</a><a href="#dataset">Dataset</a><a href="#progress">Progress</a>
+    </nav>
+    <span class="server"><span class="dot" id="srv-dot"></span><span id="srv-text">Connecting…</span></span>
+    <a class="btn primary small" href="#inspect">Inspect a load</a>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap">
+    <section class="hero">
+      <span class="pill" id="subtitle">E-waste detection and recycling quality control</span>
+      <h1>Sort e-waste right, before it hits the shredder.</h1>
+      <p class="lead">Drop in a photo of a load. A YOLO detector trained on 66 kinds of electronic waste finds every item, sorts it into the six EU recycling streams and tells you how clean the load is.</p>
+      <div class="ctas">
+        <a class="btn primary" href="#inspect">Inspect a load</a>
+        <a class="btn" href="#training">See training and results</a>
+      </div>
+      <ul class="checks">
+        <li><span class="tick"><svg width="12" height="12" viewBox="0 0 20 20"><path d="M5 10.5l3 3 7-7" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Leakage-free test set</li>
+        <li><span class="tick"><svg width="12" height="12" viewBox="0 0 20 20"><path d="M5 10.5l3 3 7-7" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Six EU WEEE streams</li>
+        <li><span class="tick"><svg width="12" height="12" viewBox="0 0 20 20"><path d="M5 10.5l3 3 7-7" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Batteries flagged for removal</li>
+      </ul>
+    </section>
+
+    <div class="showcase" id="inspect">
+      <div>
+        <div class="stage" id="stage">
+          <div class="empty" id="empty">
+            <h2>Drop a photo of an e-waste load here</h2>
+            <p>Or choose one from your computer, or use your webcam.</p>
+            <div class="ctas" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+              <button class="btn primary" id="pick">Choose photo</button>
+              <button class="btn" id="cam">Use camera</button>
+            </div>
+          </div>
+          <div class="figure" id="figure" hidden>
+            <img id="photo" alt="Uploaded load">
+            <video id="video" autoplay playsinline muted hidden></video>
+            <svg id="overlay" aria-hidden="true" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+          <div class="busy" id="busy" hidden>Detecting items…</div>
+        </div>
+        <input type="file" id="file" accept="image/*" hidden>
+        <div class="toolbar">
+          <button class="btn small" id="pick2">Choose photo</button>
+          <button class="btn small" id="cam2">Camera</button>
+          <button class="btn primary small" id="snap" hidden>Take photo</button>
+          <label>Minimum confidence <input type="range" id="conf" min="0.1" max="0.9" step="0.05" value="0.25"><output id="confv">25%</output></label>
+          <span class="timing" id="timing"></span>
+        </div>
+        <p class="err" id="error" role="alert"></p>
+      </div>
+      <aside class="panel ledger" aria-labelledby="h-ledger">
+        <h3 id="h-ledger">Load quality</h3>
+        <label class="target">This load is headed for <select id="target"></select></label>
+        <div class="purity-row"><span class="purity" id="purity">–</span><span class="purity-label">of items belong in this bin</span></div>
+        <p class="verdict" id="verdict">Add a photo to check the load.</p>
+        <div class="hazard" id="hazard" hidden><span id="hazard-text"></span></div>
+        <ul class="streams" id="streams"></ul>
+        <ul class="items" id="dets" hidden></ul>
+      </aside>
+    </div>
+
+    <section class="block" id="training">
+      <div class="head">
+        <span class="pill">Refreshes every 15 seconds</span>
+        <h2>Training, live from the laptop</h2>
+        <p>Progress of the current run, how it compares with earlier runs, and the scores on images the model never saw.</p>
+      </div>
+      <div class="grid-train">
+        <div class="panel"><h3 class="row" id="h-train">Training</h3><div id="live-card">Loading…</div></div>
+        <div class="panel chart-panel"><h3 class="row">Accuracy per epoch <span class="right">validation mAP50-95</span></h3><div id="chart"></div><div class="legend" id="legend"></div></div>
+        <div class="panel"><h3 class="row">Test score <span class="right">held-out images</span></h3><div class="scores" id="tests"></div></div>
+      </div>
+    </section>
+
+    <section class="block" id="dataset">
+      <div class="head">
+        <span class="pill">Every step writes a new folder</span>
+        <h2>How the dataset was cleaned</h2>
+        <p>From the raw Roboflow export to a dataset where no photo appears in more than one of train, validation and test.</p>
+      </div>
+      <ol class="pipeline" id="pipeline"></ol>
+    </section>
+
+    <section class="block" id="progress">
+      <div class="head">
+        <span class="pill" id="countdown">Deadline</span>
+        <h2>Assignment progress</h2>
+      </div>
+      <div class="tally" id="tally"></div>
+      <p class="next" id="next"></p>
+      <ul class="todo" id="checklist"></ul>
+      <span id="check" hidden></span>
+    </section>
+  </div>
+</main>
+
+<footer><div class="wrap"><span>E-Waste Inspector: Deep Learning PBL, Project 07</span><span>Streams follow the EU WEEE Directive (2012/19/EU). Batteries are collected separately.</span></div></footer>
+
+<script>
+
+/* ---------------- recycling streams ---------------- */
+const STREAMS = {
+  temp:   { name: "Temperature exchange", color: "var(--s-temp)",   hex: "#6FA8DC", handling: "Refrigerant must be recovered by a licensed treater." },
+  screen: { name: "Screens and monitors", color: "var(--s-screen)", hex: "#A891EC", handling: "Keep screens intact: CRT glass contains lead and older flat panels have mercury backlights." },
+  lamp:   { name: "Lamps",                color: "var(--s-lamp)",   hex: "#EB8A4E", handling: "Do not crush; fluorescent lamps contain mercury." },
+  large:  { name: "Large equipment",      color: "var(--s-large)",  hex: "#7DC48F", handling: "Bulky stream; remove loose cables and doors." },
+  small:  { name: "Small equipment",      color: "var(--s-small)",  hex: "#E479AE", handling: "Small appliances stream; check for built-in batteries." },
+  it:     { name: "Small IT and telecom", color: "var(--s-it)",     hex: "#4CC2C8", handling: "Small IT stream; remove cables and adapters." },
+  battery:{ name: "Batteries",            color: "var(--hazard)",   hex: "#F0675C", handling: "Remove before processing: fire risk in shredders." },
+};
+const CLASS_STREAM = {
+  "Air-Conditioner":"temp","Refrigerator":"temp","Freezer":"temp","Cooled-Dispenser":"temp","Cooling-Display":"temp",
+  "Dehumidifier":"temp","Water-Dispenser":"temp",
+  "CRT-Monitor":"screen","CRT-TV":"screen","Flat-Panel-Monitor":"screen","Flat-Panel-TV":"screen","Laptop":"screen",
+  "Tablet":"screen","Patient-Monitoring-System":"screen",
+  "Compact-Fluorescent-Lamps":"lamp","Straight-Tube-Fluorescent-Lamp":"lamp","LED-Bulb":"lamp",
+  "Washing-Machine":"large","Dishwasher":"large","Oven":"large","Stove":"large","Range-Hood":"large","Boiler":"large",
+  "Photovoltaic-Panel":"large","Server":"large","Rotary-Mower":"large","Street-Lamp":"large","Ceiling-Fan":"large",
+  "Electric-Bicycle":"large","Tumble-Dryer":"large",
+  "Microwave":"small","Toaster":"small","Coffee-Machine":"small","Clothes-Iron":"small","Hair-Dryer":"small",
+  "Vacuum-Cleaner":"small","Floor-Fan":"small","Exhaust-Fan":"small","Smoke-Detector":"small","Table-Lamp":"small",
+  "Christmas-Lights":"small","Neon-Sign":"small","Electric-Guitar":"small","Electronic-Keyboard":"small",
+  "Music-Player":"small","Speaker":"small","Camera":"small","Drone":"small","Game-Console":"small","PlayStation-5":"small",
+  "Xbox-Series-X":"small","Projector":"small","Blood-Pressure-Monitor":"small","Glucose-Meter":"small",
+  "Pulse-Oximeter":"small","Electrocardiograph-Machine":"small","Digital-Oscilloscope":"small","Soldering-Iron":"small",
+  "Flashlight":"small","Non-Cooled-Dispenser":"small",
+  "Smartphone":"it","Bar-Phone":"it","Telephone-Set":"it","Router":"it","Network-Switch":"it","Computer-Keyboard":"it",
+  "Computer-Mouse":"it","Desktop-PC":"it","Printer":"it","Calculator":"it","HDD":"it","SSD":"it","USB-Flash-Drive":"it",
+  "PCB":"it","Power-Adapter":"it","TV-Remote-Control":"it","Smart-Watch":"it","Headphone":"it",
+  "Battery":"battery",
+};
+const DATA_BEARING = new Set(["Smartphone", "Bar-Phone", "Laptop", "Tablet", "Desktop-PC", "HDD", "SSD", "USB-Flash-Drive", "Server", "Smart-Watch"]);
+const streamOf = n => CLASS_STREAM[n] || "small";
+const handlingOf = n => (DATA_BEARING.has(n) ? "Holds personal data: wipe or destroy the storage first. " : "") + STREAMS[streamOf(n)].handling;
+const pretty = n => n.replace(/-/g, " ");
+const $ = id => document.getElementById(id);
+
+/* ---------------- status tiles ---------------- */
+const fmt = (v, d = 3) => (v == null ? "–" : v.toFixed(d));
+const minutesText = m => m < 1 ? "just now" : m < 60 ? `${Math.round(m)} min ago` : `${(m / 60).toFixed(1)} h ago`;
+function hm(sec) {
+  if (!isFinite(sec) || sec <= 0) return "–";
+  const h = Math.floor(sec / 3600), m = Math.round((sec % 3600) / 60);
+  return h ? `${h} h ${m} min` : `${m} min`;
+}
+
+function renderLive(run) {
+  const rows = run.rows, n = rows.length, total = run.epochs_total || 0, last = rows[n - 1];
+  const stateText = { training: "Training", stalled: "No progress", finished: "Finished", starting: "Starting up", "not started": "Not started" }[run.state];
+  const perEpoch = n >= 2 ? (rows[n - 1].time - rows[0].time) / (n - 1) : n === 1 ? rows[0].time : NaN;
+  const remaining = total && n ? (total - n) * perEpoch : NaN;
+  const best = rows.reduce((b, r) => (!b || r.map > b.map ? r : b), null);
+  let alert = "";
+  if (run.state === "stalled") alert = `<div class="alert bad">No new epoch for ${minutesText(run.minutes_since_update).replace(" ago", "")}. Check the laptop is plugged in and awake.</div>`;
+  else if (run.state === "not started") alert = `<div class="alert info">Waiting for <code>${run.folder}</code>. Start the final training to see it here.</div>`;
+  else if (run.state === "finished") alert = `<div class="alert info">Done. Next: run <code>eval_test.py</code> on it.</div>`;
+  $("h-train").innerHTML = `${run.label} run <span class="right run-state state-${run.state.replace(" ", "-")}"><span class="dot"></span>${stateText}</span>`;
+  $("live-card").innerHTML = `
+    <div class="epoch">${n}<span> / ${total || "?"} epochs</span></div>
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${n}"><i style="width:${total ? Math.min(100, n / total * 100) : 0}%"></i></div>
+    <dl class="facts">
+      <dt>Latest mAP50-95</dt><dd>${last ? fmt(last.map) : "–"}</dd>
+      <dt>Best</dt><dd>${best ? `${fmt(best.map)} (epoch ${best.epoch})` : "–"}</dd>
+      <dt>Per epoch</dt><dd>${hm(perEpoch)}</dd>
+      <dt>Time left</dt><dd>${run.state === "training" ? "about " + hm(remaining) : "–"}</dd>
+      <dt>Updated</dt><dd>${run.updated ? minutesText(run.minutes_since_update) : "–"}</dd>
+    </dl>${alert}`;
+}
+
+const RUN_COLORS = ["#5E7169", "#6FA8DC", "#7EE0B0"];
+function renderChart(runs) {
+  const box = $("chart"), W = Math.max(320, box.clientWidth), H = Math.max(120, box.clientHeight);
+  const L = 34, R = 10, T = 8, B = 22;
+  const maxE = Math.max(10, ...runs.map(r => Math.max(r.epochs_total || 0, r.rows.length)));
+  const maxY = Math.max(0.6, ...runs.flatMap(r => r.rows.map(x => x.map))) * 1.06;
+  const X = e => L + (e - 1) / Math.max(1, maxE - 1) * (W - L - R);
+  const Y = v => H - B - v / maxY * (H - T - B);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Validation mAP50-95 per epoch for each run">`;
+  for (let t = 0; t <= maxY + 1e-9; t += 0.1) {
+    s += `<line x1="${L}" x2="${W - R}" y1="${Y(t)}" y2="${Y(t)}" stroke="#23392F"/>`;
+    s += `<text x="${L - 6}" y="${Y(t) + 4}" text-anchor="end" font-size="11" fill="#93AA9F">${t.toFixed(1)}</text>`;
+  }
+  const step = maxE > 40 ? 10 : 5;
+  for (let e = step; e <= maxE; e += step) s += `<text x="${X(e)}" y="${H - 6}" text-anchor="middle" font-size="11" fill="#93AA9F">${e}</text>`;
+  runs.forEach((r, i) => {
+    if (!r.rows.length) return;
+    const d = r.rows.map((p, j) => `${j ? "L" : "M"}${X(p.epoch).toFixed(1)} ${Y(p.map).toFixed(1)}`).join("");
+    const final = i === runs.length - 1, lp = r.rows[r.rows.length - 1];
+    s += `<path d="${d}" fill="none" stroke="${RUN_COLORS[i]}" stroke-width="${final ? 2.8 : 1.8}" stroke-linejoin="round"/>`;
+    s += `<circle cx="${X(lp.epoch)}" cy="${Y(lp.map)}" r="${final ? 4.5 : 3}" fill="${RUN_COLORS[i]}"><title>${r.label}, epoch ${lp.epoch}: ${lp.map.toFixed(3)}</title></circle>`;
+  });
+  box.innerHTML = s + "</svg>";
+  $("legend").innerHTML = runs.map((r, i) => `<span title="${r.note}"><i style="background:${RUN_COLORS[i]}"></i>${r.label}${r.rows.length ? "" : " (waiting)"}</span>`).join("");
+}
+
+function renderProject(p) {
+  if (p.title) $("subtitle").textContent = p.title;
+  if (p.deadline) {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const days = Math.round((new Date(p.deadline + "T00:00:00") - today) / 864e5);
+    $("countdown").innerHTML = days >= 0 ? `${days} day${days === 1 ? "" : "s"} to submission` : "Past deadline";
+  }
+  $("tests").innerHTML = (p.test_results || []).map(t => `
+    <div class="score"><span class="name">${t.model}</span><span class="hdr">mAP50</span><span class="hdr">mAP50-95</span>
+      <span></span><span class="small">${fmt(t.map50)}</span><span class="big">${fmt(t.map)}</span>
+      <span class="note">${t.note || ""}</span></div>`).join("");
+  $("pipeline").innerHTML = (p.dataset || []).map(d =>
+    `<li><b title="${d.note}">${d.images.toLocaleString()}</b><div class="step-name">${d.stage}</div><p title="${d.note}">${d.note}</p></li>`).join("");
+  const list = p.checklist || [], count = k => list.filter(c => c.status === k).length;
+  $("tally").innerHTML = `<div class="done"><b>${count("done")}</b>done</div><div class="prog"><b>${count("in progress")}</b>in progress</div><div><b>${count("to do")}</b>to do</div>`;
+  const order = { "in progress": 0, "to do": 1, "done": 2 };
+  const nextItem = [...list].sort((a, b) => order[a.status] - order[b.status]).find(c => c.status !== "done");
+  $("next").innerHTML = nextItem ? `Next up: <span>${nextItem.item}</span>` : "Everything is done.";
+  $("check").title = list.map(c => `${c.status}: ${c.item}`).join("\n");
+  $("checklist").innerHTML = [...list].sort((a, b) => order[a.status] - order[b.status]).map(c =>
+    `<li class="${c.status === "done" ? "done" : c.status === "in progress" ? "prog" : ""}">${c.item}${c.note ? `<small>${c.note}</small>` : ""}</li>`).join("");
+}
+
+let lastRuns = null;
+async function refresh() {
+  try {
+    const s = await (await fetch("/api/status")).json();
+    const modelRun = s.model ? s.model.split(/[\\/]/).slice(-3, -2)[0] : null;
+    $("srv-dot").className = "dot on";
+    $("srv-text").textContent = modelRun ? `Model: ${modelRun} on ${s.device}` : "No trained model found";
+    const runs = s.runs;
+    const live = [...runs].reverse().find(r => ["training", "stalled", "starting"].includes(r.state)) || runs[runs.length - 1];
+    renderLive(live); lastRuns = runs; renderChart(runs); renderProject(s.project || {});
+  } catch (e) {
+    $("srv-dot").className = "dot off"; $("srv-text").textContent = "Server not running";
+    $("live-card").innerHTML = `<p class="err">Start the server: <code>python server.py</code> in the webapp folder.</p>`;
+  }
+}
+refresh();
+setInterval(refresh, 15000);
+addEventListener("resize", () => lastRuns && renderChart(lastRuns));
+
+/* ---------------- inspect ---------------- */
+const target = $("target");
+target.innerHTML = Object.entries(STREAMS).filter(([k]) => k !== "battery").map(([k, v]) => `<option value="${k}">${v.name}</option>`).join("");
+target.value = "it";
+let last = null, stream = null, currentImage = null;
+
+function drawBoxes(res) {
+  const svg = $("overlay");
+  svg.setAttribute("viewBox", `0 0 ${res.width} ${res.height}`);
+  const fs = Math.max(12, res.width / 50), sw = Math.max(3, res.width / 240);
+  svg.innerHTML = `<defs><pattern id="hz" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="8" height="16" fill="#F0675C"/><rect x="8" width="8" height="16" fill="#17202B"/></pattern></defs>` +
+    res.detections.map(d => {
+      const [x1, y1, x2, y2] = d.box, k = streamOf(d.name), st = STREAMS[k], bat = k === "battery";
+      const label = `${pretty(d.name)} ${Math.round(d.conf * 100)}%`, tw = label.length * fs * 0.56 + 12;
+      const ly = y1 - fs - 8 < 0 ? y1 : y1 - fs - 8;
+      return `<g><rect x="${x1}" y="${y1}" width="${x2 - x1}" height="${y2 - y1}" fill="${st.hex}" fill-opacity=".08" stroke="${bat ? "url(#hz)" : st.hex}" stroke-width="${sw * (bat ? 2 : 1)}"/>
+        <rect x="${x1}" y="${ly}" width="${tw}" height="${fs + 8}" rx="3" fill="${st.hex}"/>
+        <text x="${x1 + 6}" y="${ly + fs + 1}" font-size="${fs}" font-family="Plus Jakarta Sans, sans-serif" font-weight="700" fill="#141C25">${label}</text></g>`;
+    }).join("");
+}
+
+function renderLedger() {
+  const dets = last ? last.detections : [], counts = {};
+  Object.keys(STREAMS).forEach(k => counts[k] = 0);
+  dets.forEach(d => counts[streamOf(d.name)]++);
+  const total = dets.length, tgt = target.value;
+  $("streams").innerHTML = Object.entries(STREAMS).map(([k, v]) => {
+    const n = counts[k], pct = total ? n / total * 100 : 0;
+    return `<li class="${n ? "" : "zero"}"><span class="sw" style="background:${v.color}"></span><span>${v.name}</span><span class="n">${n}</span>
+      <span class="track"><i style="width:${pct}%;background:${v.color}"></i></span></li>`;
+  }).join("");
+  const p = $("purity"), v = $("verdict");
+  if (!last) { p.textContent = "–"; v.textContent = "Add a photo to check the load."; v.className = "verdict"; }
+  else if (!total) { p.textContent = "–"; v.textContent = "No items found. Try a clearer photo or lower the minimum confidence."; v.className = "verdict warn"; }
+  else {
+    const purity = counts[tgt] / total, wrong = total - counts[tgt];
+    p.textContent = Math.round(purity * 100) + "%";
+    if (purity >= 0.95) { v.textContent = `Clean: all ${total} items belong here.`; v.className = "verdict ok"; }
+    else if (purity >= 0.8) { v.textContent = `Mostly clean: ${wrong} of ${total} items belong elsewhere.`; v.className = "verdict warn"; }
+    else { v.textContent = `Contaminated: ${wrong} of ${total} items belong in other streams.`; v.className = "verdict bad"; }
+  }
+  const nb = counts.battery;
+  $("hazard").hidden = !nb;
+  $("hazard-text").textContent = nb ? `${nb} batter${nb === 1 ? "y" : "ies"} found. Remove before shredding: lithium cells can start fires.` : "";
+  $("dets").hidden = !total;
+  $("dets").innerHTML = dets.map(d => {
+    const st = STREAMS[streamOf(d.name)];
+    return `<li><span class="sw" style="background:${st.color}"></span><b>${pretty(d.name)}</b><span>${Math.round(d.conf * 100)}%</span><small>${handlingOf(d.name)}</small></li>`;
+  }).join("");
+}
+target.onchange = renderLedger;
+renderLedger();
+
+async function detect(dataUrl) {
+  $("busy").hidden = false; $("error").textContent = "";
+  try {
+    const r = await fetch("/api/predict", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: dataUrl, conf: parseFloat($("conf").value) }) });
+    const res = await r.json();
+    if (!r.ok) throw new Error(res.error || "Detection failed.");
+    last = res; drawBoxes(res);
+    $("timing").textContent = `${res.detections.length} item${res.detections.length === 1 ? "" : "s"} in ${Math.round(res.ms)} ms`;
+    renderLedger();
+  } catch (e) {
+    $("error").textContent = e.message.includes("Failed to fetch") ? "Can't reach the local server. Start it with python server.py in the webapp folder." : e.message;
+  } finally { $("busy").hidden = true; }
+}
+function showImage(dataUrl) {
+  stopCamera(); currentImage = dataUrl;
+  $("empty").hidden = true; $("figure").hidden = false; $("photo").hidden = false; $("video").hidden = true;
+  $("overlay").innerHTML = ""; $("photo").src = dataUrl; detect(dataUrl);
+}
+function loadFile(f) {
+  if (!f || !f.type.startsWith("image/")) { $("error").textContent = "That file isn't an image. Choose a JPG or PNG."; return; }
+  const rd = new FileReader(); rd.onload = () => showImage(rd.result); rd.readAsDataURL(f);
+}
+$("pick").onclick = $("pick2").onclick = () => $("file").click();
+$("file").onchange = e => { loadFile(e.target.files[0]); e.target.value = ""; };
+$("conf").oninput = e => $("confv").textContent = Math.round(e.target.value * 100) + "%";
+$("conf").onchange = () => { if (currentImage) detect(currentImage); };
+const stage = $("stage");
+["dragenter", "dragover"].forEach(ev => stage.addEventListener(ev, e => { e.preventDefault(); stage.classList.add("drag"); }));
+["dragleave", "drop"].forEach(ev => stage.addEventListener(ev, e => { e.preventDefault(); stage.classList.remove("drag"); }));
+stage.addEventListener("drop", e => loadFile(e.dataTransfer.files[0]));
+async function startCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
+    const v = $("video"); v.srcObject = stream;
+    $("empty").hidden = true; $("figure").hidden = false; $("photo").hidden = true; v.hidden = false;
+    $("overlay").innerHTML = ""; $("snap").hidden = false;
+  } catch (e) { $("error").textContent = "Camera not available. Allow camera access in the browser, or choose a photo instead."; }
+}
+function stopCamera() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } $("snap").hidden = true; }
+$("cam").onclick = $("cam2").onclick = startCamera;
+$("snap").onclick = () => {
+  const v = $("video"), c = document.createElement("canvas");
+  c.width = v.videoWidth; c.height = v.videoHeight; c.getContext("2d").drawImage(v, 0, 0);
+  showImage(c.toDataURL("image/jpeg", 0.92));
+};
+
+</script>
+</body>
+</html>

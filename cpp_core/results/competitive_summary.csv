@@ -1,0 +1,4 @@
+metric,value
+cluster_purity,0.281944
+majority_class_baseline,0.10921
+final_quantisation_error,41.7409
