@@ -1,0 +1,66 @@
+{
+  "_help": "Add a model: copy an entry, give it a new key and name, point path at its best.pt. {PROJECT} = the project folder. Scores are from eval_test.py (test_map50, test_map) and cross_dataset_eval.py + qc_app (cross_map50).",
+  "models": [
+    {
+      "key": "m1_baseline",
+      "name": "1. Baseline YOLO26n (leaky split)",
+      "path": "{PROJECT}/runs/detect/runs/ewaste/yolo26n_baseline/weights/best.pt",
+      "test_map50": 0.752,
+      "test_map": 0.594,
+      "test_note": "old test set, partly inflated by leakage",
+      "note": "First model, trained on the original Roboflow split. Its test set contained near-copies of training images."
+    },
+    {
+      "key": "m2_leakfree",
+      "name": "2. Leak-free YOLO26n (duplicates removed)",
+      "path": "{PROJECT}/runs/detect/yolo26n_deduplicated-4/weights/best.pt",
+      "test_map50": 0.757,
+      "test_map": 0.596,
+      "test_note": "old test set",
+      "note": "Exact duplicates removed. Two classes still had no training images."
+    },
+    {
+      "key": "m3_final_n",
+      "name": "3. Final YOLO26n (grouped split, 66 classes)",
+      "path": "D:/ewaste_runs/final_v2/weights/best.pt",
+      "test_map50": 0.812,
+      "test_map": 0.656,
+      "cross_map50": 0.499,
+      "default": true,
+      "note": "Leak-free grouped split. Fastest model: 1.9 ms per image. Deployed model."
+    },
+    {
+      "key": "m4_yolo26s",
+      "name": "4. YOLO26s (3.8x bigger)",
+      "path": "D:/ewaste_runs/final_v2_s/weights/best.pt",
+      "test_map50": 0.824,
+      "test_map": 0.677,
+      "note": "Same data, larger network. 3.6 ms per image."
+    },
+    {
+      "key": "m5_openimages",
+      "name": "5. YOLO26n + 3,991 Open Images photos",
+      "path": "D:/ewaste_runs/final_v3_ft/weights/best.pt",
+      "test_map50": 0.813,
+      "test_map": 0.657,
+      "note": "Data-scaling experiment: same overall score; helped microwaves and ovens, hurt TVs and stoves."
+    },
+    {
+      "key": "m6_yolo26m",
+      "name": "6. YOLO26m (8.5x bigger, best score)",
+      "path": "D:/ewaste_runs/final_v2_m-2/weights/best.pt",
+      "test_map50": 0.833,
+      "test_map": 0.684,
+      "note": "Largest model. 8.7 ms per image."
+    },
+    {
+      "key": "m7_bangladesh",
+      "name": "7. YOLO26n + Bangladeshi photos (works at a new site)",
+      "path": "D:/ewaste_runs/final_v4_ft/weights/best.pt",
+      "test_map50": 0.806,
+      "test_map": 0.653,
+      "note": "Fine-tuned with 1,334 photos from an independent dataset. Other-dataset score 0.50 to 0.92; own test 0.812 to 0.806.",
+      "cross_map50": 0.916
+    }
+  ]
+}

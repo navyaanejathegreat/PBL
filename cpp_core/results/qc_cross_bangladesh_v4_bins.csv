@@ -1,0 +1,8 @@
+bin,items,correct,purity,battery_hazards,data_bearing
+temp,0,0,1.0000,0,0
+screen,0,0,1.0000,0,0
+lamp,11,10,0.9091,0,0
+large,0,0,1.0000,0,0
+small,0,0,1.0000,0,0
+it,274,166,0.6058,0,0
+battery,55,45,0.8182,0,0

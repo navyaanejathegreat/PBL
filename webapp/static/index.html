@@ -5,175 +5,202 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>E-Waste Sorting Inspector</title>
 <style>
-  @font-face { font-family: "Plus Jakarta Sans"; src: url("/fonts/plus-jakarta-sans.woff2") format("woff2");
-    font-weight: 200 800; font-display: swap; }
+  @font-face { font-family: "Bricolage Grotesque"; src: url("/fonts/bricolage-grotesque.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
+  @font-face { font-family: "Instrument Sans"; src: url("/fonts/instrument-sans.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
   :root {
-    --bg: #0B1612;          /* deep spruce, near black */
-    --bg-2: #0F1D18;
-    --card: #132520;
-    --card-2: #1A302A;
-    --line: #23392F;
-    --text: #EAF3EE;
-    --mute: #93AA9F;
-    --green: #2E9E6E;       /* spruce green: primary buttons */
-    --mint: #7EE0B0;        /* highlights, checks */
-    --s-temp: #6FA8DC; --s-screen: #A891EC; --s-lamp: #EB8A4E;
-    --s-large: #7DC48F; --s-small: #E479AE; --s-it: #4CC2C8;
-    --hazard: #F0675C; --ok: #7EE0B0; --warn: #EBB061; --bad: #F0675C;
-    --font: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
-    --radius: 20px;
+    --bg: #F2F5FA; --card: #FFFFFF; --card-2: #EEF2F8; --line: #DCE3EE;
+    --text: #0F1A2E; --mute: #5A6579;
+    --blue: #3355FF; --blue-2: #2440E0; --blue-soft: #E7ECFF;
+    --green: #0FA971; --violet: #7C4DFF;
+    --s-temp: #3B82F6; --s-screen: #8B5CF6; --s-lamp: #FF7A30;
+    --s-large: #10B981; --s-small: #EC4899; --s-it: #06B6D4;
+    --hazard: #F0433A; --ok: #0FA971; --warn: #E8711A; --bad: #E5372E;
+    --display: "Bricolage Grotesque", "Segoe UI", sans-serif;
+    --font: "Instrument Sans", "Segoe UI", Arial, sans-serif;
+    --radius: 14px;
   }
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; scroll-padding-top: 84px; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--font); -webkit-font-smoothing: antialiased; }
-  :focus-visible { outline: 3px solid var(--mint); outline-offset: 3px; border-radius: 6px; }
+  html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16.5px/1.6 var(--font); -webkit-font-smoothing: antialiased; }
+  :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 6px; }
   button, select, input { font: inherit; color: inherit; }
   [hidden] { display: none !important; }
   a { color: inherit; text-decoration: none; }
   code { font-size: 13px; background: var(--card-2); padding: 1px 6px; border-radius: 6px; }
-  .wrap { width: min(1200px, 100% - 40px); margin: 0 auto; }
+  .wrap { width: min(1480px, 100% - 64px); margin: 0 auto; }
+  h1, h2, .display { font-family: var(--display); }
 
-  /* ---------- nav ---------- */
-  .nav { position: sticky; top: 0; z-index: 10; background: rgba(11,22,18,.82); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
-  .nav .wrap { display: flex; align-items: center; gap: 28px; height: 68px; }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
-  .mark { width: 30px; height: 30px; border-radius: 9px; background: var(--green); display: grid; place-items: center; }
-  .links { display: flex; gap: 24px; margin-left: auto; font-size: 15px; font-weight: 600; color: var(--mute); }
-  .links a:hover { color: var(--text); }
-  .server { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--mute); }
+  /* nav */
+  .nav { position: sticky; top: 0; z-index: 10; background: rgba(242,245,250,.86); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  .nav .wrap { display: flex; align-items: center; gap: 28px; height: 72px; }
+  .brand { display: flex; align-items: center; gap: 11px; font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: -0.01em; }
+  .mark { width: 34px; height: 34px; border-radius: 9px; background: var(--text); display: grid; place-items: center; }
+  .links { display: flex; gap: 6px; margin-left: auto; font-size: 15px; font-weight: 600; }
+  .links a { padding: 8px 14px; border-radius: 999px; color: var(--mute); }
+  .links a:hover { background: var(--card); color: var(--text); }
+  .server { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--mute); background: var(--card); border: 1px solid var(--line); padding: 7px 12px; border-radius: 999px; }
   .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mute); flex: none; }
-  .dot.on { background: var(--mint); } .dot.off { background: var(--bad); }
+  .dot.on { background: var(--green); box-shadow: 0 0 0 3px rgba(15,169,113,.18); } .dot.off { background: var(--bad); }
 
-  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--line);
-    background: var(--card); padding: 11px 20px; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: pointer; }
-  .btn:hover { background: var(--card-2); }
-  .btn.primary { background: var(--green); border-color: var(--green); color: #fff; }
-  .btn.primary:hover { background: #33AE79; }
-  .btn.small { padding: 8px 14px; font-size: 14px; border-radius: 10px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1.5px solid var(--line);
+    background: var(--card); padding: 11px 20px; border-radius: 10px; font-weight: 650; font-size: 15.5px; cursor: pointer; transition: transform .15s, box-shadow .15s; }
+  .btn:hover { border-color: #C3CDDD; }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .btn.primary:hover { background: var(--blue-2); }
+  .btn.small { padding: 8px 14px; font-size: 14px; border-radius: 9px; }
 
-  /* ---------- hero ---------- */
-  .hero { text-align: center; padding: 72px 0 40px; }
-  .pill { display: inline-block; padding: 6px 14px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); font-size: 13px; font-weight: 600; color: var(--mint); }
-  .hero h1 { margin: 20px auto 18px; max-width: 17ch; font-size: clamp(40px, 5.8vw, 72px); line-height: 1.04; font-weight: 800; letter-spacing: -0.025em; }
-  .hero p.lead { margin: 0 auto; max-width: 56ch; color: var(--mute); font-size: 18px; }
-  .hero .ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 30px 0 26px; }
-  .checks { display: flex; gap: 10px 28px; justify-content: center; flex-wrap: wrap; list-style: none; margin: 0; padding: 0; font-weight: 600; font-size: 15px; }
-  .checks li { display: inline-flex; align-items: center; gap: 8px; }
-  .tick { width: 20px; height: 20px; border-radius: 50%; background: var(--green); display: inline-grid; place-items: center; flex: none; }
+  /* hero */
+  .hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 48px; align-items: center; padding: 56px 0 40px; }
+  .eyebrow { display: inline-block; color: var(--blue-2); font-size: 15px; font-weight: 700; }
+  .eyebrow i { width: 20px; height: 20px; border-radius: 50%; background: var(--blue); display: inline-grid; place-items: center; }
+  .hero h1 { margin: 14px 0 18px; font-size: clamp(38px, 4.2vw, 62px); line-height: 1.06; font-weight: 750; letter-spacing: -0.02em; }
+  .hero p.lead { margin: 0; max-width: 54ch; color: var(--mute); font-size: 19px; }
+  .ctas { display: flex; gap: 12px; flex-wrap: wrap; margin: 28px 0 0; }
+  .bins { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+  .bins span { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); font-size: 13.5px; font-weight: 600; }
+  .bins i { width: 10px; height: 10px; border-radius: 3px; }
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .tile { border-radius: var(--radius); padding: 22px 22px 20px; background: var(--card); border: 1px solid var(--line); min-height: 150px; display: flex; flex-direction: column; justify-content: space-between; }
+  .tile b { font-family: var(--display); font-size: clamp(34px, 3.2vw, 48px); font-weight: 750; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; color: var(--text); }
+  .tile span { font-size: 14.5px; font-weight: 600; color: var(--mute); }
+  .tile small { display: block; font-size: 13px; color: var(--mute); font-weight: 500; margin-top: 6px; }
+  .t1 { grid-column: span 2; min-height: 170px; background: var(--text); border-color: var(--text); }
+  .t1 span, .t1 small { color: #B7C1D3; } .t1 b { color: #fff; font-size: clamp(44px, 4.4vw, 64px); }
+  .tiles .wide { grid-column: span 2; }
 
-  /* ---------- detector showcase ---------- */
-  .showcase { background: var(--bg-2); border: 1px solid var(--line); border-radius: 28px; padding: 14px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 14px; }
-  .stage { position: relative; min-height: 470px; border-radius: var(--radius); background: #08110E; overflow: hidden; display: grid; place-items: center; }
-  .stage.drag { outline: 2px dashed var(--mint); outline-offset: -10px; }
-  .empty { text-align: center; padding: 28px; max-width: 42ch; }
-  .empty h2 { margin: 0 0 8px; font-size: 26px; letter-spacing: -0.02em; line-height: 1.15; }
-  .empty p { margin: 0 0 20px; color: var(--mute); }
-  .figure { position: absolute; inset: 0; }
+  /* inspect */
+  .showcase { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; box-shadow: 0 1px 2px rgba(15,26,46,.06); }
+  .stage { position: relative; min-height: 540px; border-radius: var(--radius); overflow: hidden; display: grid; place-items: center;
+    background-color: #F7F9FC; background-image: radial-gradient(#D3DBE8 1.2px, transparent 1.2px); background-size: 22px 22px; border: 1.5px dashed #CBD5E4; }
+  .stage.drag { border-color: var(--blue); background-color: var(--blue-soft); }
+  .empty { text-align: center; padding: 28px; max-width: 46ch; }
+  .empty .icon { width: 64px; height: 64px; border-radius: 16px; background: var(--blue); display: grid; place-items: center; margin: 0 auto 18px; }
+  .empty h2 { margin: 0 0 8px; font-size: 26px; letter-spacing: -0.025em; line-height: 1.1; }
+  .empty p { margin: 0 0 22px; color: var(--mute); }
+  .empty .ctas { justify-content: center; margin: 0; }
+  .figure { position: absolute; inset: 0; background: #0F1A2E; }
   .figure img, .figure video { width: 100%; height: 100%; object-fit: contain; display: block; }
   .figure svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .busy { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(8,17,14,.6); font-weight: 700; }
-  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 12px 6px 4px; font-size: 14px; }
-  .toolbar label { display: flex; align-items: center; gap: 8px; color: var(--mute); }
-  .toolbar input[type=range] { accent-color: var(--mint); width: 130px; }
-  .toolbar output { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
-  .timing { margin-left: auto; color: var(--mute); }
-  .err { color: var(--bad); font-weight: 700; font-size: 14px; margin: 6px 6px 0; }
+  .busy { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(15,26,46,.55); color: #fff; font-weight: 700; font-size: 18px; }
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 14px 4px 2px; font-size: 14px; }
+  .toolbar label { display: flex; align-items: center; gap: 8px; color: var(--mute); font-weight: 600; }
+  .toolbar input[type=range] { accent-color: var(--blue); width: 150px; }
+  .toolbar output { font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+  .timing { margin-left: auto; color: var(--mute); font-weight: 600; }
+  .err { color: var(--bad); font-weight: 700; font-size: 14px; margin: 6px 4px 0; }
   .err:empty { display: none; }
 
-  .panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; min-width: 0; }
-  .ledger { display: flex; flex-direction: column; gap: 0; max-height: 560px; overflow: auto; }
-  .ledger h3, .panel h3 { margin: 0 0 12px; font-size: 16px; font-weight: 700; color: var(--mute); }
-  .target { display: grid; gap: 6px; font-size: 14px; color: var(--mute); }
-  .target select { padding: 10px 12px; border-radius: 10px; background: var(--card-2); border: 1px solid var(--line); }
-  .purity-row { display: flex; align-items: baseline; gap: 10px; margin: 16px 0 2px; }
-  .purity { font-size: 56px; font-weight: 800; line-height: .95; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
-  .purity-label { color: var(--mute); font-size: 14px; }
-  .verdict { margin: 6px 0 12px; font-weight: 700; font-size: 15px; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; min-width: 0; }
+  .ledger { background: var(--bg); border: 0; display: flex; flex-direction: column; max-height: 640px; overflow: auto; }
+  .ledger h3, .panel h3 { margin: 0 0 12px; font-family: var(--display); font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+  .target { display: grid; gap: 6px; font-size: 14px; color: var(--mute); font-weight: 600; }
+  .target select { padding: 11px 12px; border-radius: 12px; background: var(--card); border: 1.5px solid var(--line); font-weight: 600; color: var(--text); }
+  .purity-card { margin: 16px 0 12px; padding: 18px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
+  .purity-row { display: flex; align-items: baseline; gap: 10px; }
+  .purity { font-family: var(--display); font-size: 64px; font-weight: 800; line-height: .95; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; color: var(--blue); }
+  .purity-label { color: var(--mute); font-size: 14px; font-weight: 600; }
+  .verdict { margin: 8px 0 0; font-weight: 700; font-size: 15px; }
   .verdict.ok { color: var(--ok); } .verdict.warn { color: var(--warn); } .verdict.bad { color: var(--bad); }
-  .hazard { margin: 0 0 12px; padding: 6px; border-radius: 12px; background: repeating-linear-gradient(-45deg, var(--hazard) 0 10px, #2A1517 10px 20px); }
-  .hazard span { display: block; background: #2A1517; color: #FFD9D5; font-weight: 700; font-size: 14px; padding: 8px 10px; border-radius: 8px; }
+  .hazard { margin: 0 0 12px; padding: 5px; border-radius: 14px; background: repeating-linear-gradient(-45deg, var(--hazard) 0 10px, #0F1A2E 10px 20px); }
+  .hazard span { display: block; background: #FFF1F0; color: #9E1C15; font-weight: 700; font-size: 14px; padding: 9px 11px; border-radius: 10px; }
   .streams, .items { list-style: none; margin: 0; padding: 0; }
-  .streams li { display: grid; grid-template-columns: 10px 1fr auto; gap: 3px 10px; align-items: center; padding: 6px 0; font-size: 14px; }
-  .sw { width: 10px; height: 10px; border-radius: 3px; }
+  .streams li { display: grid; grid-template-columns: 12px 1fr auto; gap: 4px 10px; align-items: center; padding: 7px 0; font-size: 14.5px; font-weight: 600; }
+  .sw { width: 12px; height: 12px; border-radius: 4px; }
   .streams .n { font-weight: 800; font-variant-numeric: tabular-nums; }
-  .streams .track { grid-column: 2 / 4; height: 4px; background: var(--card-2); border-radius: 2px; overflow: hidden; }
-  .streams .track i { display: block; height: 100%; border-radius: 2px; }
-  .streams li.zero { color: var(--mute); }
-  .items { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13.5px; }
-  .items li { padding: 5px 0; display: grid; grid-template-columns: 10px 1fr auto; gap: 0 10px; align-items: baseline; }
+  .streams .track { grid-column: 2 / 4; height: 6px; background: var(--card-2); border-radius: 3px; overflow: hidden; }
+  .streams .track i { display: block; height: 100%; border-radius: 3px; transition: width .5s; }
+  .streams li.zero { color: #9AA3B2; }
+  .items { margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; }
+  .items li { padding: 6px 0; display: grid; grid-template-columns: 12px 1fr auto; gap: 0 10px; align-items: baseline; }
   .items li .sw { align-self: center; }
   .items li small { grid-column: 2 / 4; color: var(--mute); }
 
-  /* ---------- sections ---------- */
+  /* model picker */
+  .modelbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 4px 4px 14px; }
+  .modelbar label { font-weight: 700; font-size: 14px; color: var(--mute); }
+  .modelbar select { padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--blue); background: var(--blue-soft); color: var(--blue-2); font-weight: 700; min-width: 320px; }
+  .mscore { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+  .mscore span { padding: 6px 11px; border-radius: 999px; background: var(--bg); font-size: 13px; font-weight: 700; }
+  .mscore b { color: var(--blue); }
+  .modelbar .btn { margin-left: auto; }
+  .mnote { flex-basis: 100%; color: var(--mute); font-size: 13.5px; margin: -4px 0 0; }
+  .compare { margin-top: 16px; }
+  .compare table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .compare th { text-align: left; color: var(--mute); font-weight: 700; font-size: 12.5px; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  .compare td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .compare tr.cur td { background: var(--blue-soft); }
+  .compare td.num { font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+  .compare small { color: var(--mute); }
+
+  /* model history */
+  .history { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  .hcard { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+  .hcard:hover { border-color: var(--blue); }
+  .hcard.sel { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(51,85,255,.15); }
+  .hcard.off { opacity: .55; cursor: default; }
+  .hcard .step { font-size: 12.5px; font-weight: 700; color: var(--mute); }
+  .hcard .hname { font-weight: 700; line-height: 1.3; min-height: 2.6em; }
+  .hcard .hmap { font-family: var(--display); font-size: 34px; font-weight: 750; letter-spacing: -0.03em; line-height: 1; color: var(--blue); font-variant-numeric: tabular-nums; }
+  .hcard .hmap small { display: block; font-family: var(--font); font-size: 12.5px; color: var(--mute); font-weight: 600; letter-spacing: 0; margin-top: 6px; }
+  .hcard .hbar { height: 8px; border-radius: 4px; background: var(--card-2); overflow: hidden; }
+  .hcard .hbar i { display: block; height: 100%; border-radius: 4px; background: var(--blue); }
+  .hcard .hbadge { align-self: flex-start; font-size: 12px; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: var(--green); color: #fff; }
+  .hcard .hnote { font-size: 13px; color: var(--mute); }
+
+  /* sections */
   section.block { padding: 88px 0 0; }
-  .head { text-align: center; margin-bottom: 32px; }
-  .head h2 { margin: 14px 0 10px; font-size: clamp(30px, 3.6vw, 44px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
-  .head p { margin: 0 auto; max-width: 56ch; color: var(--mute); }
+  .head { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 28px; flex-wrap: wrap; }
+  .head h2 { margin: 0; font-size: clamp(28px, 3vw, 42px); font-weight: 750; letter-spacing: -0.022em; line-height: 1.05; }
+  .head p { margin: 0; max-width: 52ch; color: var(--mute); }
+  .kicker { display: block; color: var(--blue-2); font-size: 14px; font-weight: 700; margin-bottom: 8px; }
 
-  .grid-train { display: grid; grid-template-columns: 320px minmax(0, 1fr) 340px; gap: 14px; }
-  .run-state { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: var(--text); }
-  .state-training .dot { background: var(--mint); animation: pulse 1.6s ease-in-out infinite; }
-  .state-stalled .dot { background: var(--bad); }
-  .state-finished .dot { background: var(--s-temp); }
-  @keyframes pulse { 50% { opacity: .3; } }
+  .results { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
   .panel h3.row { display: flex; align-items: center; gap: 10px; }
-  .panel h3 .right { margin-left: auto; font-weight: 500; font-size: 13px; }
-  .epoch { font-size: 54px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; margin: 6px 0 4px; font-variant-numeric: tabular-nums; }
-  .epoch span { font-size: 16px; font-weight: 500; color: var(--mute); letter-spacing: 0; }
-  .bar { height: 8px; background: var(--card-2); border-radius: 4px; overflow: hidden; margin: 10px 0 14px; }
-  .bar i { display: block; height: 100%; background: var(--mint); border-radius: 4px; transition: width .6s; }
-  .facts { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; }
-  .facts dt { color: var(--mute); }
-  .facts dd { margin: 0; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
-  .alert { margin-top: 14px; padding: 10px 12px; border-radius: 12px; font-size: 13.5px; background: var(--card-2); border: 1px solid var(--line); }
-  .alert.bad { border-color: var(--bad); }
+  .panel h3 .right { margin-left: auto; font-family: var(--font); font-weight: 600; font-size: 13px; color: var(--mute); }
+  .rtable { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  .rtable th { text-align: left; color: var(--mute); font-weight: 650; font-size: 13px; padding: 0 10px 10px; border-bottom: 1px solid var(--line); }
+  .rtable th.num, .rtable td.num { text-align: right; }
+  .rtable td { padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .rtable tr:last-child td { border-bottom: 0; }
+  .rtable td.num { font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+  .rtable td small { display: block; color: var(--mute); font-size: 12.5px; margin-top: 2px; }
+  .rtable tr.top td.num.m50 { color: var(--blue-2); }
+  .rtable .tag { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 6px; background: var(--blue-soft); color: var(--blue-2); font-size: 11.5px; font-weight: 700; vertical-align: 1px; }
+  .rnote { margin: 14px 0 0; color: var(--mute); font-size: 13px; }
   .chart-panel { display: flex; flex-direction: column; }
-  #chart { flex: 1; min-height: 230px; }
+  #chart { flex: 1; min-height: 260px; }
   #chart svg { width: 100%; height: 100%; display: block; }
-  .legend { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 13px; color: var(--mute); margin-top: 6px; }
-  .legend span { display: inline-flex; align-items: center; gap: 6px; }
-  .legend i { width: 16px; height: 3px; border-radius: 2px; display: inline-block; }
-  .scores { display: grid; gap: 14px; }
-  .score { display: grid; grid-template-columns: 1fr auto auto; gap: 0 16px; align-items: baseline; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
-  .score:last-child { border-bottom: 0; padding-bottom: 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13.5px; color: var(--mute); margin-top: 8px; font-weight: 600; }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .legend i { width: 18px; height: 4px; border-radius: 2px; display: inline-block; }
+  .scores { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+  .score { display: grid; grid-template-columns: 1fr auto auto; gap: 0 16px; align-items: baseline; padding: 16px 18px; border-radius: 16px; background: var(--bg); }
   .score .name { font-weight: 700; }
-  .score .big { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .score .big { font-family: var(--display); font-size: 30px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--blue); }
   .score .small { font-size: 16px; font-weight: 700; color: var(--mute); font-variant-numeric: tabular-nums; }
-  .score .hdr { font-size: 12px; color: var(--mute); }
-  .score .note { grid-column: 1 / -1; color: var(--mute); font-size: 13px; margin-top: 4px; }
+  .score .hdr { font-size: 12px; color: var(--mute); font-weight: 600; }
+  .score .note { grid-column: 1 / -1; color: var(--mute); font-size: 13px; margin-top: 3px; }
 
-  .pipeline { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; counter-reset: s; }
-  .pipeline li { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; counter-increment: s; }
-  .pipeline li::before { content: "Step " counter(s); display: inline-block; font-size: 12px; font-weight: 700; color: var(--mint); background: var(--card-2); padding: 3px 10px; border-radius: 999px; }
-  .pipeline b { display: block; margin-top: 14px; font-size: 34px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .pipeline { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: s; }
+  .pipeline li { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; counter-increment: s; position: relative; overflow: hidden; }
+  .pipeline li::before { content: counter(s); display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; font-family: var(--display); font-size: 15px; font-weight: 700; color: var(--blue-2); background: var(--blue-soft); }
+  .pipeline b { display: block; margin-top: 16px; font-family: var(--display); font-size: 36px; font-weight: 750; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
   .pipeline .step-name { font-weight: 700; margin-top: 2px; }
   .pipeline p { margin: 6px 0 0; color: var(--mute); font-size: 14px; }
 
-  .tally { display: flex; gap: 10px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
-  .tally div { min-width: 120px; text-align: center; padding: 10px 16px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); font-size: 13px; color: var(--mute); }
-  .tally b { display: block; font-size: 26px; font-weight: 800; color: var(--text); }
-  .tally .done b { color: var(--ok); } .tally .prog b { color: var(--warn); }
-  .next { text-align: center; color: var(--mute); margin-bottom: 18px; } .next span { color: var(--text); font-weight: 700; }
-  .todo { list-style: none; margin: 0 auto; padding: 0; max-width: 760px; display: grid; gap: 8px; }
-  .todo li { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); font-weight: 600; }
-  .todo li::before { content: ""; flex: none; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--mute); }
-  .todo li.done { color: var(--mute); }
-  .todo li.done::before { background: var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3 3 7-7' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat; border-color: var(--green); }
-  .todo li.prog::before { border-color: var(--warn); background: linear-gradient(90deg, var(--warn) 50%, transparent 50%); }
-  .todo small { margin-left: auto; color: var(--mute); font-weight: 500; text-align: right; }
+  footer { margin-top: 110px; background: #0F1A2E; color: #B7C1D3; font-size: 14px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; padding: 32px 0 40px; }
+  footer b { color: #fff; font-family: var(--display); font-size: 18px; }
 
-  footer { margin-top: 96px; padding: 28px 0 40px; border-top: 1px solid var(--line); color: var(--mute); font-size: 14px; }
-  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
-
-  @media (max-width: 1080px) {
-    .showcase, .grid-train { grid-template-columns: 1fr; }
+  @media (max-width: 1180px) {
+    .hero, .showcase, .results { grid-template-columns: 1fr; }
     .ledger { max-height: none; }
     .pipeline { grid-template-columns: repeat(2, 1fr); }
-    .links { display: none; }
-    .nav .server { margin-left: auto; }
+    .links { display: none; } .nav .server { margin-left: auto; }
   }
-  @media (max-width: 560px) { .pipeline { grid-template-columns: 1fr; } .stage { min-height: 320px; } }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .state-training .dot { animation: none; } .bar i { transition: none; } }
+  @media (max-width: 640px) { .wrap { width: calc(100% - 28px); } .pipeline { grid-template-columns: 1fr; } .stage { min-height: 340px; } .tiles { grid-template-columns: 1fr; } .tiles .wide, .t1 { grid-column: auto; } }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .streams .track i { transition: none; } .btn { transition: none; } }
 </style>
 </head>
 <body>
@@ -183,7 +210,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7.6 9"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7l-1.2-2.1"/><path d="M14 16l-3 3 3 3"/><path d="M8.3 13.3L7.6 9 3.3 9.7"/><path d="M9.3 5.3l1.2-2.1a1.8 1.8 0 0 1 3.1 0l4 7"/><path d="M13.7 9.5l3.9 0.6.6-4.3"/></svg></span>
       E-Waste Inspector</a>
     <nav class="links" aria-label="Sections">
-      <a href="#inspect">Inspect</a><a href="#training">Training</a><a href="#dataset">Dataset</a><a href="#progress">Progress</a>
+      <a href="#inspect">Inspect</a><a href="#history">Models</a><a href="#results">Results</a><a href="#dataset">Dataset</a>
     </nav>
     <span class="server"><span class="dot" id="srv-dot"></span><span id="srv-text">Connecting…</span></span>
     <a class="btn primary small" href="#inspect">Inspect a load</a>
@@ -193,27 +220,40 @@
 <main id="top">
   <div class="wrap">
     <section class="hero">
-      <span class="pill" id="subtitle">E-waste detection and recycling quality control</span>
-      <h1>Sort e-waste right, before it hits the shredder.</h1>
-      <p class="lead">Drop in a photo of a load. A YOLO detector trained on 66 kinds of electronic waste finds every item, sorts it into the six EU recycling streams and tells you how clean the load is.</p>
-      <div class="ctas">
-        <a class="btn primary" href="#inspect">Inspect a load</a>
-        <a class="btn" href="#training">See training and results</a>
+      <div>
+        <span class="eyebrow" id="subtitle">Deep Learning PBL, Project 07</span>
+        <h1>E-waste detection and recycling quality control</h1>
+        <p class="lead">A YOLO26 detector recognises 66 kinds of electronic waste in a photo, assigns each item to one of seven recycling streams and reports how clean the load is before it reaches the shredder.</p>
+        <div class="ctas">
+          <a class="btn primary" href="#inspect">Inspect a load</a>
+          <a class="btn" href="#results">See the results</a>
+        </div>
+        <div class="bins" id="bins"></div>
       </div>
-      <ul class="checks">
-        <li><span class="tick"><svg width="12" height="12" viewBox="0 0 20 20"><path d="M5 10.5l3 3 7-7" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Leakage-free test set</li>
-        <li><span class="tick"><svg width="12" height="12" viewBox="0 0 20 20"><path d="M5 10.5l3 3 7-7" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Six EU WEEE streams</li>
-        <li><span class="tick"><svg width="12" height="12" viewBox="0 0 20 20"><path d="M5 10.5l3 3 7-7" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Batteries flagged for removal</li>
-      </ul>
+      <div class="tiles">
+        <div class="tile t1"><span>Test mAP50 on held-out images</span><div><b id="hero-map">0.812</b><small id="hero-map-note">YOLO26n, leak-free test split</small></div></div>
+        <div class="tile t2"><span>Kinds of e-waste</span><b>66</b></div>
+        <div class="tile t3"><span>Recycling bins</span><b>7</b></div>
+        <div class="tile t4"><span>Per image on the GPU</span><b>1.9 ms</b></div>
+        <div class="tile t5"><span>Held-out test images</span><b>3,307</b></div>
+      </div>
     </section>
 
     <div class="showcase" id="inspect">
       <div>
+        <div class="modelbar">
+          <label for="model">Model</label>
+          <select id="model"></select>
+          <span class="mscore" id="mscore"></span>
+          <button class="btn small" id="compareBtn" disabled>Compare all models on this photo</button>
+          <p class="mnote" id="mnote"></p>
+        </div>
         <div class="stage" id="stage">
           <div class="empty" id="empty">
+            <div class="icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="11" r="2"/><path d="M21 16l-5-5-8 8"/></svg></div>
             <h2>Drop a photo of an e-waste load here</h2>
             <p>Or choose one from your computer, or use your webcam.</p>
-            <div class="ctas" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <div class="ctas">
               <button class="btn primary" id="pick">Choose photo</button>
               <button class="btn" id="cam">Use camera</button>
             </div>
@@ -234,66 +274,64 @@
           <span class="timing" id="timing"></span>
         </div>
         <p class="err" id="error" role="alert"></p>
+        <div class="compare panel" id="compare" hidden><h3 class="row">Every model on this photo <span class="right" id="compareState"></span></h3><table><thead><tr><th>Model</th><th>Items</th><th>Purity</th><th>Time</th><th>What it found</th></tr></thead><tbody id="compareBody"></tbody></table></div>
       </div>
       <aside class="panel ledger" aria-labelledby="h-ledger">
         <h3 id="h-ledger">Load quality</h3>
         <label class="target">This load is headed for <select id="target"></select></label>
-        <div class="purity-row"><span class="purity" id="purity">–</span><span class="purity-label">of items belong in this bin</span></div>
-        <p class="verdict" id="verdict">Add a photo to check the load.</p>
+        <div class="purity-card"><div class="purity-row"><span class="purity" id="purity">–</span><span class="purity-label">of items belong in this bin</span></div>
+        <p class="verdict" id="verdict">Add a photo to check the load.</p></div>
         <div class="hazard" id="hazard" hidden><span id="hazard-text"></span></div>
         <ul class="streams" id="streams"></ul>
         <ul class="items" id="dets" hidden></ul>
       </aside>
     </div>
 
-    <section class="block" id="training">
+    <section class="block" id="history">
       <div class="head">
-        <span class="pill">Refreshes every 15 seconds</span>
-        <h2>Training, live from the laptop</h2>
-        <p>Progress of the current run, how it compares with earlier runs, and the scores on images the model never saw.</p>
+        <div><span class="kicker">Model history</span><h2>How the model improved</h2></div>
+        <p>Every model trained in this project, in order, with its score on held-out test images. Select a card to run that model on the current photo.</p>
       </div>
-      <div class="grid-train">
-        <div class="panel"><h3 class="row" id="h-train">Training</h3><div id="live-card">Loading…</div></div>
-        <div class="panel chart-panel"><h3 class="row">Accuracy per epoch <span class="right">validation mAP50-95</span></h3><div id="chart"></div><div class="legend" id="legend"></div></div>
-        <div class="panel"><h3 class="row">Test score <span class="right">held-out images</span></h3><div class="scores" id="tests"></div></div>
+      <div class="history" id="historyCards"></div>
+    </section>
+
+    <section class="block" id="results">
+      <div class="head">
+        <div><span class="kicker">Evaluation</span><h2>Training and results</h2></div>
+        <p>Validation accuracy during training, and the final score of every model on test images it never saw.</p>
+      </div>
+      <div class="results">
+        <div class="panel"><h3 class="row">Test scores <span class="right">mAP on held-out images</span></h3>
+          <table class="rtable"><thead><tr><th>Model</th><th class="num">mAP50</th><th class="num">mAP50-95</th><th class="num">Other dataset</th></tr></thead><tbody id="tests"></tbody></table>
+          <p class="rnote" id="rnote"></p></div>
+        <div class="panel chart-panel"><h3 class="row">Training curves <span class="right">validation mAP50-95 per epoch</span></h3><div id="chart"></div><div class="legend" id="legend"></div></div>
       </div>
     </section>
 
     <section class="block" id="dataset">
       <div class="head">
-        <span class="pill">Every step writes a new folder</span>
-        <h2>How the dataset was cleaned</h2>
+        <div><span class="kicker">Data preparation</span><h2>How the dataset was cleaned</h2></div>
         <p>From the raw Roboflow export to a dataset where no photo appears in more than one of train, validation and test.</p>
       </div>
       <ol class="pipeline" id="pipeline"></ol>
     </section>
 
-    <section class="block" id="progress">
-      <div class="head">
-        <span class="pill" id="countdown">Deadline</span>
-        <h2>Assignment progress</h2>
-      </div>
-      <div class="tally" id="tally"></div>
-      <p class="next" id="next"></p>
-      <ul class="todo" id="checklist"></ul>
-      <span id="check" hidden></span>
-    </section>
   </div>
 </main>
 
-<footer><div class="wrap"><span>E-Waste Inspector: Deep Learning PBL, Project 07</span><span>Streams follow the EU WEEE Directive (2012/19/EU). Batteries are collected separately.</span></div></footer>
+<footer><div class="wrap"><span><b>E-Waste Inspector</b><br>Navya Aneja, B.Tech CSE (AI/ML), UPES<br>Deep Learning PBL, Project 07</span><span>Recycling streams follow the EU WEEE Directive (2012/19/EU).<br>Batteries are collected separately as a fire hazard.</span></div></footer>
 
 <script>
 
 /* ---------------- recycling streams ---------------- */
 const STREAMS = {
-  temp:   { name: "Temperature exchange", color: "var(--s-temp)",   hex: "#6FA8DC", handling: "Refrigerant must be recovered by a licensed treater." },
-  screen: { name: "Screens and monitors", color: "var(--s-screen)", hex: "#A891EC", handling: "Keep screens intact: CRT glass contains lead and older flat panels have mercury backlights." },
-  lamp:   { name: "Lamps",                color: "var(--s-lamp)",   hex: "#EB8A4E", handling: "Do not crush; fluorescent lamps contain mercury." },
-  large:  { name: "Large equipment",      color: "var(--s-large)",  hex: "#7DC48F", handling: "Bulky stream; remove loose cables and doors." },
-  small:  { name: "Small equipment",      color: "var(--s-small)",  hex: "#E479AE", handling: "Small appliances stream; check for built-in batteries." },
-  it:     { name: "Small IT and telecom", color: "var(--s-it)",     hex: "#4CC2C8", handling: "Small IT stream; remove cables and adapters." },
-  battery:{ name: "Batteries",            color: "var(--hazard)",   hex: "#F0675C", handling: "Remove before processing: fire risk in shredders." },
+  temp:   { name: "Temperature exchange", color: "var(--s-temp)",   hex: "#3B82F6", handling: "Refrigerant must be recovered by a licensed treater." },
+  screen: { name: "Screens and monitors", color: "var(--s-screen)", hex: "#8B5CF6", handling: "Keep screens intact: CRT glass contains lead and older flat panels have mercury backlights." },
+  lamp:   { name: "Lamps",                color: "var(--s-lamp)",   hex: "#FF7A30", handling: "Do not crush; fluorescent lamps contain mercury." },
+  large:  { name: "Large equipment",      color: "var(--s-large)",  hex: "#10B981", handling: "Bulky stream; remove loose cables and doors." },
+  small:  { name: "Small equipment",      color: "var(--s-small)",  hex: "#EC4899", handling: "Small appliances stream; check for built-in batteries." },
+  it:     { name: "Small IT and telecom", color: "var(--s-it)",     hex: "#06B6D4", handling: "Small IT stream; remove cables and adapters." },
+  battery:{ name: "Batteries",            color: "var(--hazard)",   hex: "#F0433A", handling: "Remove before processing: fire risk in shredders." },
 };
 const CLASS_STREAM = {
   "Air-Conditioner":"temp","Refrigerator":"temp","Freezer":"temp","Cooled-Dispenser":"temp","Cooling-Display":"temp",
@@ -331,30 +369,7 @@ function hm(sec) {
   return h ? `${h} h ${m} min` : `${m} min`;
 }
 
-function renderLive(run) {
-  const rows = run.rows, n = rows.length, total = run.epochs_total || 0, last = rows[n - 1];
-  const stateText = { training: "Training", stalled: "No progress", finished: "Finished", starting: "Starting up", "not started": "Not started" }[run.state];
-  const perEpoch = n >= 2 ? (rows[n - 1].time - rows[0].time) / (n - 1) : n === 1 ? rows[0].time : NaN;
-  const remaining = total && n ? (total - n) * perEpoch : NaN;
-  const best = rows.reduce((b, r) => (!b || r.map > b.map ? r : b), null);
-  let alert = "";
-  if (run.state === "stalled") alert = `<div class="alert bad">No new epoch for ${minutesText(run.minutes_since_update).replace(" ago", "")}. Check the laptop is plugged in and awake.</div>`;
-  else if (run.state === "not started") alert = `<div class="alert info">Waiting for <code>${run.folder}</code>. Start the final training to see it here.</div>`;
-  else if (run.state === "finished") alert = `<div class="alert info">Done. Next: run <code>eval_test.py</code> on it.</div>`;
-  $("h-train").innerHTML = `${run.label} run <span class="right run-state state-${run.state.replace(" ", "-")}"><span class="dot"></span>${stateText}</span>`;
-  $("live-card").innerHTML = `
-    <div class="epoch">${n}<span> / ${total || "?"} epochs</span></div>
-    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${n}"><i style="width:${total ? Math.min(100, n / total * 100) : 0}%"></i></div>
-    <dl class="facts">
-      <dt>Latest mAP50-95</dt><dd>${last ? fmt(last.map) : "–"}</dd>
-      <dt>Best</dt><dd>${best ? `${fmt(best.map)} (epoch ${best.epoch})` : "–"}</dd>
-      <dt>Per epoch</dt><dd>${hm(perEpoch)}</dd>
-      <dt>Time left</dt><dd>${run.state === "training" ? "about " + hm(remaining) : "–"}</dd>
-      <dt>Updated</dt><dd>${run.updated ? minutesText(run.minutes_since_update) : "–"}</dd>
-    </dl>${alert}`;
-}
-
-const RUN_COLORS = ["#5E7169", "#6FA8DC", "#7EE0B0"];
+const RUN_COLORS = ["#AAB4C4", "#EC4899", "#3355FF", "#0FA971", "#7C4DFF", "#06B6D4"];
 function renderChart(runs) {
   const box = $("chart"), W = Math.max(320, box.clientWidth), H = Math.max(120, box.clientHeight);
   const L = 34, R = 10, T = 8, B = 22;
@@ -364,11 +379,11 @@ function renderChart(runs) {
   const Y = v => H - B - v / maxY * (H - T - B);
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Validation mAP50-95 per epoch for each run">`;
   for (let t = 0; t <= maxY + 1e-9; t += 0.1) {
-    s += `<line x1="${L}" x2="${W - R}" y1="${Y(t)}" y2="${Y(t)}" stroke="#23392F"/>`;
-    s += `<text x="${L - 6}" y="${Y(t) + 4}" text-anchor="end" font-size="11" fill="#93AA9F">${t.toFixed(1)}</text>`;
+    s += `<line x1="${L}" x2="${W - R}" y1="${Y(t)}" y2="${Y(t)}" stroke="#E3E8F0"/>`;
+    s += `<text x="${L - 6}" y="${Y(t) + 4}" text-anchor="end" font-size="11" fill="#5A6579">${t.toFixed(1)}</text>`;
   }
   const step = maxE > 40 ? 10 : 5;
-  for (let e = step; e <= maxE; e += step) s += `<text x="${X(e)}" y="${H - 6}" text-anchor="middle" font-size="11" fill="#93AA9F">${e}</text>`;
+  for (let e = step; e <= maxE; e += step) s += `<text x="${X(e)}" y="${H - 6}" text-anchor="middle" font-size="11" fill="#5A6579">${e}</text>`;
   runs.forEach((r, i) => {
     if (!r.rows.length) return;
     const d = r.rows.map((p, j) => `${j ? "L" : "M"}${X(p.epoch).toFixed(1)} ${Y(p.map).toFixed(1)}`).join("");
@@ -381,46 +396,80 @@ function renderChart(runs) {
 }
 
 function renderProject(p) {
-  if (p.title) $("subtitle").textContent = p.title;
-  if (p.deadline) {
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const days = Math.round((new Date(p.deadline + "T00:00:00") - today) / 864e5);
-    $("countdown").innerHTML = days >= 0 ? `${days} day${days === 1 ? "" : "s"} to submission` : "Past deadline";
-  }
-  $("tests").innerHTML = (p.test_results || []).map(t => `
-    <div class="score"><span class="name">${t.model}</span><span class="hdr">mAP50</span><span class="hdr">mAP50-95</span>
-      <span></span><span class="small">${fmt(t.map50)}</span><span class="big">${fmt(t.map)}</span>
-      <span class="note">${t.note || ""}</span></div>`).join("");
   $("pipeline").innerHTML = (p.dataset || []).map(d =>
     `<li><b title="${d.note}">${d.images.toLocaleString()}</b><div class="step-name">${d.stage}</div><p title="${d.note}">${d.note}</p></li>`).join("");
-  const list = p.checklist || [], count = k => list.filter(c => c.status === k).length;
-  $("tally").innerHTML = `<div class="done"><b>${count("done")}</b>done</div><div class="prog"><b>${count("in progress")}</b>in progress</div><div><b>${count("to do")}</b>to do</div>`;
-  const order = { "in progress": 0, "to do": 1, "done": 2 };
-  const nextItem = [...list].sort((a, b) => order[a.status] - order[b.status]).find(c => c.status !== "done");
-  $("next").innerHTML = nextItem ? `Next up: <span>${nextItem.item}</span>` : "Everything is done.";
-  $("check").title = list.map(c => `${c.status}: ${c.item}`).join("\n");
-  $("checklist").innerHTML = [...list].sort((a, b) => order[a.status] - order[b.status]).map(c =>
-    `<li class="${c.status === "done" ? "done" : c.status === "in progress" ? "prog" : ""}">${c.item}${c.note ? `<small>${c.note}</small>` : ""}</li>`).join("");
 }
+
+function renderResults() {
+  const scored = MODELS.filter(m => m.test_map50 != null);
+  const best = Math.max(...scored.map(m => m.test_map50));
+  const def = MODELS.find(m => m.default);
+  if (def && def.test_map50 != null) $("hero-map").textContent = def.test_map50.toFixed(3);
+  $("tests").innerHTML = MODELS.map(m => `
+    <tr class="${m.test_map50 === best ? "top" : ""}">
+      <td><b>${m.name}</b>${m.default ? '<span class="tag">Deployed</span>' : ""}${m.test_map50 === best ? '<span class="tag">Best score</span>' : ""}
+        ${m.test_note ? `<small>${m.test_note}</small>` : ""}</td>
+      <td class="num m50">${fmt3(m.test_map50)}</td><td class="num">${fmt3(m.test_map)}</td>
+      <td class="num">${m.cross_map50 == null ? "–" : m.cross_map50.toFixed(3)}</td></tr>`).join("");
+  $("rnote").textContent = "Models 1 and 2 were scored on the original test split, which shared near-duplicate photos with training. Models 3 to 7 use the leak-free test split of 3,307 images, so only they can be compared directly. Other dataset: an independent e-waste dataset collected elsewhere.";
+}
+
+let MODELS = [], currentModel = null;
+const fmt3 = v => (v == null ? "–" : v.toFixed(3));
+function renderModels(list, def) {
+  const first = !MODELS.length;
+  MODELS = list;
+  if (!currentModel || !MODELS.some(m => m.key === currentModel && m.available)) currentModel = def;
+  const sel = $("model");
+  sel.innerHTML = MODELS.map(m => `<option value="${m.key}" ${m.available ? "" : "disabled"}>${m.name}${m.available ? "" : " (not trained yet)"}</option>`).join("");
+  sel.value = currentModel || "";
+  renderModelInfo();
+  renderResults();
+  const best = Math.max(...MODELS.filter(m => m.test_map50 != null).map(m => m.test_map50));
+  $("historyCards").innerHTML = MODELS.map((m, i) => `
+    <button class="hcard ${m.key === currentModel ? "sel" : ""} ${m.available ? "" : "off"}" data-key="${m.key}" ${m.available ? "" : "disabled"}>
+      <span class="step">Model ${i + 1}</span>
+      <span class="hname">${m.name.replace(/^\d+\.\s*/, "")}</span>
+      <span class="hmap">${m.test_map50 == null ? "–" : m.test_map50.toFixed(3)}<small>test mAP50</small></span>
+      <span class="hbar"><i style="width:${m.test_map50 ? Math.max(4, (m.test_map50 - 0.6) / 0.25 * 100) : 0}%"></i></span>
+      ${m.test_map50 === best ? '<span class="hbadge">Best score</span>' : ""}
+      <span class="hnote">${m.note || ""}</span>
+    </button>`).join("");
+  document.querySelectorAll(".hcard").forEach(b => b.onclick = () => { if (!b.disabled) { selectModel(b.dataset.key); $("inspect").scrollIntoView(); } });
+  if (first) $("compareBtn").disabled = !currentImage;
+}
+function renderModelInfo() {
+  const m = MODELS.find(x => x.key === currentModel);
+  if (!m) { $("mscore").innerHTML = ""; $("mnote").textContent = "No trained model found."; return; }
+  $("mscore").innerHTML = `<span>test mAP50 <b>${fmt3(m.test_map50)}</b></span><span>mAP50-95 <b>${fmt3(m.test_map)}</b></span>` +
+    (m.cross_map50 != null ? `<span>other dataset <b>${m.cross_map50.toFixed(3)}</b></span>` : "");
+  $("mnote").textContent = (m.note || "") + (m.test_note ? ` (${m.test_note})` : "");
+}
+function selectModel(key) {
+  currentModel = key; $("model").value = key; renderModelInfo();
+  document.querySelectorAll(".hcard").forEach(b => b.classList.toggle("sel", b.dataset.key === key));
+  if (currentImage) detect(currentImage);
+}
+$("model").onchange = e => selectModel(e.target.value);
 
 let lastRuns = null;
 async function refresh() {
   try {
     const s = await (await fetch("/api/status")).json();
-    const modelRun = s.model ? s.model.split(/[\\/]/).slice(-3, -2)[0] : null;
+    const nAvail = (s.models || []).filter(m => m.available).length;
     $("srv-dot").className = "dot on";
-    $("srv-text").textContent = modelRun ? `Model: ${modelRun} on ${s.device}` : "No trained model found";
-    const runs = s.runs;
-    const live = [...runs].reverse().find(r => ["training", "stalled", "starting"].includes(r.state)) || runs[runs.length - 1];
-    renderLive(live); lastRuns = runs; renderChart(runs); renderProject(s.project || {});
+    $("srv-text").textContent = nAvail ? `${nAvail} models ready, ${String(s.device).toUpperCase() === "CPU" ? "CPU" : "GPU"}` : "No trained model found";
+    renderModels(s.models || [], s.default_model);
+    lastRuns = s.runs || []; renderChart(lastRuns); renderProject(s.project || {});
   } catch (e) {
     $("srv-dot").className = "dot off"; $("srv-text").textContent = "Server not running";
-    $("live-card").innerHTML = `<p class="err">Start the server: <code>python server.py</code> in the webapp folder.</p>`;
   }
 }
 refresh();
-setInterval(refresh, 15000);
+setInterval(refresh, 30000);
 addEventListener("resize", () => lastRuns && renderChart(lastRuns));
+
+$("bins").innerHTML = Object.values(STREAMS).map(v => `<span><i style="background:${v.color}"></i>${v.name}</span>`).join("");
 
 /* ---------------- inspect ---------------- */
 const target = $("target");
@@ -433,14 +482,14 @@ function drawBoxes(res) {
   svg.setAttribute("viewBox", `0 0 ${res.width} ${res.height}`);
   const fs = Math.max(12, res.width / 50), sw = Math.max(3, res.width / 240);
   svg.innerHTML = `<defs><pattern id="hz" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-      <rect width="8" height="16" fill="#F0675C"/><rect x="8" width="8" height="16" fill="#17202B"/></pattern></defs>` +
+      <rect width="8" height="16" fill="#F0433A"/><rect x="8" width="8" height="16" fill="#0F1A2E"/></pattern></defs>` +
     res.detections.map(d => {
       const [x1, y1, x2, y2] = d.box, k = streamOf(d.name), st = STREAMS[k], bat = k === "battery";
       const label = `${pretty(d.name)} ${Math.round(d.conf * 100)}%`, tw = label.length * fs * 0.56 + 12;
       const ly = y1 - fs - 8 < 0 ? y1 : y1 - fs - 8;
       return `<g><rect x="${x1}" y="${y1}" width="${x2 - x1}" height="${y2 - y1}" fill="${st.hex}" fill-opacity=".08" stroke="${bat ? "url(#hz)" : st.hex}" stroke-width="${sw * (bat ? 2 : 1)}"/>
         <rect x="${x1}" y="${ly}" width="${tw}" height="${fs + 8}" rx="3" fill="${st.hex}"/>
-        <text x="${x1 + 6}" y="${ly + fs + 1}" font-size="${fs}" font-family="Plus Jakarta Sans, sans-serif" font-weight="700" fill="#141C25">${label}</text></g>`;
+        <text x="${x1 + 6}" y="${ly + fs + 1}" font-size="${fs}" font-family="Instrument Sans, sans-serif" font-weight="700" fill="#fff">${label}</text></g>`;
     }).join("");
 }
 
@@ -480,18 +529,18 @@ async function detect(dataUrl) {
   $("busy").hidden = false; $("error").textContent = "";
   try {
     const r = await fetch("/api/predict", { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image: dataUrl, conf: parseFloat($("conf").value) }) });
+      body: JSON.stringify({ image: dataUrl, conf: parseFloat($("conf").value), model: currentModel }) });
     const res = await r.json();
     if (!r.ok) throw new Error(res.error || "Detection failed.");
     last = res; drawBoxes(res);
-    $("timing").textContent = `${res.detections.length} item${res.detections.length === 1 ? "" : "s"} in ${Math.round(res.ms)} ms`;
+    $("timing").textContent = `${res.model_name.replace(/^\d+\.\s*/, "")}: ${res.detections.length} item${res.detections.length === 1 ? "" : "s"} in ${Math.round(res.ms)} ms`;
     renderLedger();
   } catch (e) {
     $("error").textContent = e.message.includes("Failed to fetch") ? "Can't reach the local server. Start it with python server.py in the webapp folder." : e.message;
   } finally { $("busy").hidden = true; }
 }
 function showImage(dataUrl) {
-  stopCamera(); currentImage = dataUrl;
+  stopCamera(); currentImage = dataUrl; $("compareBtn").disabled = false; $("compare").hidden = true;
   $("empty").hidden = true; $("figure").hidden = false; $("photo").hidden = false; $("video").hidden = true;
   $("overlay").innerHTML = ""; $("photo").src = dataUrl; detect(dataUrl);
 }
@@ -517,6 +566,33 @@ async function startCamera() {
 }
 function stopCamera() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } $("snap").hidden = true; }
 $("cam").onclick = $("cam2").onclick = startCamera;
+
+async function compareAll() {
+  if (!currentImage) return;
+  const avail = MODELS.filter(m => m.available), tgt = target.value, body = $("compareBody");
+  $("compare").hidden = false; $("compareBtn").disabled = true;
+  body.innerHTML = avail.map(m => `<tr id="cmp-${m.key}" class="${m.key === currentModel ? "cur" : ""}"><td><b>${m.name}</b></td><td class="num">…</td><td class="num"></td><td class="num"></td><td></td></tr>`).join("");
+  let done = 0;
+  for (const m of avail) {
+    $("compareState").textContent = `running ${++done} of ${avail.length}…`;
+    const row = $("cmp-" + m.key);
+    try {
+      const r = await fetch("/api/predict", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: currentImage, conf: parseFloat($("conf").value), model: m.key }) });
+      const res = await r.json();
+      if (!r.ok) throw new Error(res.error);
+      const n = res.detections.length, inBin = res.detections.filter(d => streamOf(d.name) === tgt).length;
+      const counts = {};
+      res.detections.forEach(d => counts[pretty(d.name)] = (counts[pretty(d.name)] || 0) + 1);
+      row.innerHTML = `<td><b>${m.name}</b><br><small>test mAP50 ${fmt3(m.test_map50)}</small></td><td class="num">${n}</td>
+        <td class="num">${n ? Math.round(inBin / n * 100) + "%" : "–"}</td><td class="num">${Math.round(res.ms)} ms</td>
+        <td>${Object.entries(counts).map(([k, v]) => `${v}× ${k}`).join(", ") || "<small>nothing found</small>"}</td>`;
+    } catch (e) { row.innerHTML = `<td><b>${m.name}</b></td><td colspan="4"><small>${e.message}</small></td>`; }
+  }
+  $("compareState").textContent = `purity = share of items for the ${STREAMS[tgt].name} bin`;
+  $("compareBtn").disabled = false;
+}
+$("compareBtn").onclick = compareAll;
 $("snap").onclick = () => {
   const v = $("video"), c = document.createElement("canvas");
   c.width = v.videoWidth; c.height = v.videoHeight; c.getContext("2d").drawImage(v, 0, 0);
