@@ -20,6 +20,7 @@ import base64
 import csv
 import io
 import json
+import sys
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -221,7 +222,16 @@ def main():
     print(f"Default: {default}")
     print(f"Device: {_device}")
     print(f"Open    http://localhost:{a.port}   (Ctrl+C to stop)")
-    ThreadingHTTPServer(("127.0.0.1", a.port), Handler).serve_forever()
+    class Server(ThreadingHTTPServer):
+        # On Windows, address reuse lets a second copy bind the same port while the old copy
+        # keeps answering, so the browser silently talks to the old server. Refuse instead.
+        allow_reuse_address = False
+    try:
+        httpd = Server(("127.0.0.1", a.port), Handler)
+    except OSError:
+        sys.exit(f"Port {a.port} is already in use: an older copy of this server is still running. "
+                 f"Close it (Ctrl+C in its window) or use --port {a.port + 1}.")
+    httpd.serve_forever()
 
 
 if __name__ == "__main__":

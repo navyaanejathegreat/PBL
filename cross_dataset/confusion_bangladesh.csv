@@ -1,0 +1,28 @@
+real_class,model_said,count
+Battery,(nothing found),29
+Battery,Battery,11
+Battery,USB-Flash-Drive,5
+Battery,Projector,3
+Battery,Music-Player,1
+Keyboard,Computer-Keyboard,30
+Keyboard,USB-Flash-Drive,5
+Keyboard,Smartphone,4
+Light-Bulb,LED-Bulb,8
+Light-Bulb,USB-Flash-Drive,1
+Light-Bulb,(nothing found),1
+Mobile,Smartphone,20
+Mobile,(nothing found),12
+Mobile,Laptop,6
+Mobile,Bar-Phone,4
+Mobile,USB-Flash-Drive,3
+Mobile,TV-Remote-Control,3
+Mobile,Battery,2
+Mobile,HDD,1
+Mobile,Flashlight,1
+Mouse,Computer-Mouse,13
+Mouse,(nothing found),12
+Mouse,USB-Flash-Drive,3
+Mouse,Flashlight,1
+PCB,(nothing found),23
+PCB,PCB,22
+PCB,Computer-Keyboard,16
